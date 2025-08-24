@@ -80,206 +80,265 @@ This platform provides a complete e-commerce solution tailored for skincare busi
 - **Production:** Scalable containerized deployment
 
 ## 📁 Project Structure
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-```
-skincare/
-├── frontend/                    # Next.js Application
-│   ├── app/                    # App Router Pages
-│   │   ├── admin/              # Admin Panel (11 sections)
-│   │   │   ├── categories/     # Category management
-│   │   │   ├── coupons/        # Discount management
-│   │   │   ├── customers/      # Customer management
-│   │   │   ├── inventory/      # Stock management
-│   │   │   ├── login/          # Admin authentication
-│   │   │   ├── orders/         # Order management
-│   │   │   ├── products/       # Product management
-│   │   │   ├── reports/        # Business analytics
-│   │   │   ├── reviews/        # Review moderation
-│   │   │   ├── sales/          # Sales analytics
-│   │   │   └── settings/       # System settings
-│   │   ├── cart/               # Shopping cart
-│   │   ├── login/              # Customer auth
-│   │   ├── orders/             # Order history
-│   │   ├── products/           # Product catalog
-│   │   ├── profile/            # User profiles
-│   │   ├── register/           # Registration
-│   │   └── wishlist/           # Saved items
-│   ├── components/             # Reusable Components
-│   ├── contexts/               # State Management
-│   └── lib/                    # APIs & Utilities
-├── services/                   # Backend Services
-├── docker-compose.yml          # Container Configuration
-├── db.txt                      # Database Schema
-└── README.md                   # Documentation
-```
+## Getting Started
 
-## 🚀 Quick Start
+First, run the development server:
 
-### Prerequisites
-- Node.js 18+ 
-- Docker & Docker Compose
-- Git
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd skincare
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start with Docker (Recommended)**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Or start manually**
-   ```bash
-   # Start backend services
-   cd services
-   npm run dev
-
-   # Start frontend (in new terminal)
-   cd frontend
-   npm run dev
-   ```
-
-5. **Access the application**
-   - **Customer Store:** http://localhost:3000
-   - **Admin Panel:** http://localhost:3000/admin
-
-### Default Credentials
-
-**Customer Demo Account:**
-- Email: `demo@example.com`
-- Password: `demo123`
-
-**Admin Account:**
-- Email: `admin@skincare.com`
-- Password: `admin123`
-
-## 🔧 Development
-
-### Frontend Development
 ```bash
-cd frontend
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run lint         # Run linting
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### Backend Development
-```bash
-cd services
-npm run dev          # Start backend services
-npm run test         # Run tests
+Open [http://localhost:3000](http://localhost:4000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+## Frontend Structure
+
+# E-commerce Platform
+
+A full-featured e-commerce application built with Next.js 13+ App Router, featuring both customer-facing store and comprehensive admin panel.
+
+## 🏗️ Project Structure
+
+### Root Directory
+```
+project-root/
+├── app/                      # Next.js App Router pages
+├── components/               # Reusable UI components
+├── contexts/                 # React context providers
+├── lib/                      # Utility functions and API
+└── [other Next.js files]
 ```
 
-### Using Mock Data
-The frontend includes comprehensive mock data for development:
-- 27+ skincare products with detailed information
-- Customer profiles and order history
-- Admin analytics and reports
-- Review and rating systems
-- Coupon and discount management
+### App Directory Structure
 
-## 🐳 Deployment
-
-### Docker Deployment
-```bash
-# Build and start all services
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
+#### Customer Pages
+```
+app/
+├── cart/
+│   └── page.tsx             # Shopping cart
+├── login/
+│   └── page.tsx             # User authentication
+├── orders/
+│   └── page.tsx             # Order history
+├── products/
+│   ├── [id]/
+│   │   └── page.tsx         # Product details
+│   └── page.tsx             # Products catalog
+├── profile/
+│   ├── edit/
+│   │   └── page.tsx         # Edit profile
+│   └── page.tsx             # View profile
+├── register/
+│   └── page.tsx             # User registration
+├── wishlist/
+│   └── page.tsx             # Saved items
+├── layout.tsx               # Root layout
+└── page.tsx                 # Homepage
 ```
 
-### Production Environment Variables
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/skincare
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-
-# Authentication
-JWT_SECRET=your-super-secret-jwt-key
-JWT_EXPIRES_IN=7d
-
-# API
-API_BASE_URL=https://api.yourdomain.com
-FRONTEND_URL=https://yourdomain.com
-
-# Email (optional)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
+#### Admin Panel
+```
+app/admin/
+├── categories/
+│   └── page.tsx             # Manage categories
+├── coupons/
+│   └── page.tsx             # Discount management
+├── customers/
+│   ├── [id]/
+│   │   └── page.tsx         # Customer details
+│   └── page.tsx             # Customer list
+├── inventory/
+│   └── page.tsx             # Stock management
+├── login/
+│   └── page.tsx             # Admin authentication
+├── orders/
+│   ├── [id]/
+│   │   └── page.tsx         # Order details
+│   └── page.tsx             # Order management
+├── products/
+│   ├── [id]/
+│   │   └── page.tsx         # Edit product
+│   ├── new/
+│   │   └── page.tsx         # Create product
+│   └── page.tsx             # Product management
+├── reports/
+│   └── page.tsx             # Analytics
+├── reviews/
+│   └── page.tsx             # Review moderation
+├── sales/
+│   └── page.tsx             # Sales analytics
+├── settings/
+│   └── page.tsx             # Admin settings
+├── layout.tsx               # Admin layout
+└── page.tsx                 # Admin dashboard
 ```
 
-## 📚 API Documentation
-
-### Customer Endpoints
+### Components
 ```
-GET    /api/products           # Get all products
-GET    /api/products/:id       # Get product details
-POST   /api/auth/login         # Customer login
-POST   /api/auth/register      # Customer registration
-GET    /api/orders             # Get user orders
-POST   /api/orders             # Create new order
+components/
+├── AdminQuickAccess.tsx     # Quick admin navigation
+├── Footer.tsx               # Site footer
+└── Navbar.tsx               # Navigation bar
 ```
 
-### Admin Endpoints
+### State Management
 ```
-POST   /api/admin/login        # Admin authentication
-GET    /api/admin/dashboard    # Dashboard analytics
-GET    /api/admin/products     # Product management
-POST   /api/admin/products     # Create product
-PUT    /api/admin/products/:id # Update product
-DELETE /api/admin/products/:id # Delete product
-GET    /api/admin/orders       # Order management
-GET    /api/admin/customers    # Customer management
+contexts/
+├── AuthContext.tsx          # User authentication state
+└── WishlistContext.tsx      # Wishlist management
 ```
 
-## 🧪 Testing
-
-### Frontend Testing
-```bash
-cd frontend
-npm run test          # Run unit tests
-npm run test:coverage # Coverage report
+### API Layer
+```
+lib/
+├── api.ts                   # Production API calls
+└── mockApi.ts               # Development/testing API
 ```
 
-### Backend Testing
-```bash
-cd services
-npm run test          # Run API tests
-npm run test:e2e      # End-to-end tests
+### Upload File
+```
+components/
+├── FileUpload/
+│   ├── ProfilePictureUpload.tsx
+│   ├── ReviewPhotoUpload.tsx
+│   ├── ProgressPhotoUpload.tsx
+│   └── FileUploadArea.tsx
+├── Feedback/
+│   ├── EnhancedReviewForm.tsx
+│   ├── ProgressTracker.tsx
+│   ├── BeforeAfterComparison.tsx
+│   └── QuestionAnswerSystem.tsx
+├── Analytics/
+│   ├── ProgressChart.tsx
+│   ├── ReviewPhotoGallery.tsx
+│   └── UserEngagementStats.tsx
+└── Moderation/
+    ├── ContentModerationQueue.tsx
+    ├── ReviewApprovalSystem.tsx
+    └── FileProcessingStatus.tsx
 ```
 
-## 🤝 Contributing
+## 🌐 Route Structure
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
+### Customer Routes
+- **`/`** - Homepage
+- **`/products`** - Product catalog
+- **`/products/[id]`** - Individual product page
+- **`/cart`** - Shopping cart
+- **`/wishlist`** - Saved items
+- **`/profile`** - User profile
+- **`/profile/edit`** - Edit profile
+- **`/orders`** - Order history
+- **`/login`** - User login
+- **`/register`** - User registration
+
+### Admin Routes
+- **`/admin`** - Dashboard
+- **`/admin/login`** - Admin authentication
+- **`/admin/products`** - Product management
+- **`/admin/products/new`** - Create product
+- **`/admin/products/[id]`** - Edit product
+- **`/admin/orders`** - Order management
+- **`/admin/orders/[id]`** - Order details
+- **`/admin/customers`** - Customer management
+- **`/admin/customers/[id]`** - Customer profile
+- **`/admin/categories`** - Category management
+- **`/admin/inventory`** - Stock control
+- **`/admin/coupons`** - Discount codes
+- **`/admin/reviews`** - Review moderation
+- **`/admin/reports`** - Analytics dashboard
+- **`/admin/sales`** - Sales metrics
+- **`/admin/settings`** - System configuration
+
+## ✨ Key Features
+
+### Architecture
+- **Next.js 13+ App Router** - Modern file-based routing
+- **React Context** - Global state management
+- **TypeScript** - Type-safe development
+- **Component Architecture** - Reusable UI components
+
+### Customer Experience
+- Product browsing and search
+- Shopping cart functionality
+- User authentication and profiles
+- Order tracking and history
+- Wishlist management
+- Responsive design
+
+### Admin Capabilities
+- **Product Management** - Full CRUD operations
+- **Order Processing** - Track and manage orders
+- **Customer Support** - User account management
+- **Inventory Control** - Stock level monitoring
+- **Marketing Tools** - Categories and coupons
+- **Analytics** - Sales reports and insights
+- **Content Moderation** - Review management
+- **System Administration** - Settings and configuration
+
+### Technical Features
+- Server-side rendering (SSR)
+- Dynamic routing with parameters
+- Separate admin authentication
+- API abstraction layer
+- Mock API for development
+- Context-based state management
+
+## 🚀 Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev`
+4. Access the application at `http://localhost:4000`
+5. Access admin panel at `http://localhost:4000/admin`
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 13+
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** React Context
+- **Routing:** App Router (file-based)
+- **Authentication:** Custom implementation
+
+## 📱 Responsive Design
+
+The application is fully responsive and optimized for:
+- Desktop computers
+- Tablets
+- Mobile devices
+
+---
+
+*This e-commerce platform provides a complete solution for online retail with powerful admin tools and excellent user experience.*
 
 ### Development Guidelines
 - Follow TypeScript best practices
@@ -347,404 +406,3 @@ For support and questions:
 
 **Built with ❤️ for the skincare industry**
 
-
-# Skincare E-commerce Platform
-
-A multilingual skincare e-commerce platform with AI-powered recommendations supporting Thai, English, and Khmer languages.
-
-## Tech Stack
-- **Frontend**: Next.js + React + TypeScript
-- **Backend**: Go (Microservices) + Python FastAPI (ML)
-- **Databases**: PostgreSQL + MongoDB
-- **Cache**: Redis
-
-## Architecture
-Microservices architecture with separate services for different concerns.
-
-## Setup Instructions
-See individual service README files for setup instructions.
-
-## Development
-1. Start databases: `docker-compose up -d`
-2. Start services in separate terminals
-3. Access frontend at http://localhost:3000
-```
-
-## Step 4: Frontend Setup (Next.js)
-
-```bash
-cd frontend
-```
-
-```bash
-npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir
-```
-
-```bash
-npm install react-i18next i18next-browser-languagedetector i18next-http-backend
-```
-
-```bash
-npm install @headlessui/react @heroicons/react axios zustand
-```
-
-```bash
-npm install @types/node @types/react @types/react-dom
-```
-
-Create `frontend/README.md`:
-```markdown
-# Frontend - Skincare E-commerce
-
-## Setup
-```bash
-npm install
-npm run dev
-```
-
-## Features
-- Multilingual support (Thai, English, Khmer)
-- Responsive design
-- Product catalog
-- Shopping cart
-- User authentication
-```
-
-## Step 5: API Gateway Setup (Go)
-
-```bash
-cd ..\services\api-gateway
-```
-
-```bash
-go mod init github.com/yourusername/skincare/api-gateway
-```
-
-```bash
-go get github.com/gin-gonic/gin
-```
-
-```bash
-go get github.com/gin-contrib/cors
-```
-
-```bash
-go get gorm.io/gorm gorm.io/driver/postgres
-```
-
-```bash
-go get github.com/golang-jwt/jwt/v5
-```
-
-```bash
-go get github.com/go-redis/redis/v8
-```
-
-## Step 6: Product Service Setup (Go)
-
-```bash
-cd ..\product-service
-```
-
-```bash
-go mod init github.com/yourusername/skincare/product-service
-```
-
-```bash
-go get github.com/gin-gonic/gin gorm.io/gorm gorm.io/driver/postgres
-```
-
-```bash
-go get github.com/go-playground/validator/v10
-```
-
-```bash
-go get github.com/google/uuid
-```
-
-## Step 7: Auth Service Setup (Go)
-
-```bash
-cd ..\auth-service
-```
-
-```bash
-go mod init github.com/yourusername/skincare/auth-service
-```
-
-```bash
-go get github.com/gin-gonic/gin gorm.io/gorm gorm.io/driver/postgres
-```
-
-```bash
-go get golang.org/x/crypto/bcrypt
-```
-
-```bash
-go get github.com/golang-jwt/jwt/v5
-```
-
-## Step 8: Order Service Setup (Go)
-
-```bash
-cd ..\order-service
-```
-
-```bash
-go mod init github.com/yourusername/skincare/order-service
-```
-
-```bash
-go get github.com/gin-gonic/gin gorm.io/gorm gorm.io/driver/postgres
-```
-
-## Step 9: ML Service Setup (Python)
-
-```bash
-cd ..\ml-service
-```
-
-```bash
-python -m venv venv
-```
-
-```bash
-venv\Scripts\activate
-```
-
-```bash
-pip install fastapi uvicorn pymongo motor pandas scikit-learn
-```
-
-```bash
-pip install python-multipart pydantic python-jose[cryptography]
-```
-
-```bash
-pip freeze > requirements.txt
-```
-
-Create `services/ml-service/README.md`:
-```markdown
-# ML Service - Recommendation Engine
-
-## Setup
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8001
-```
-
-## Features
-- Product recommendations
-- User behavior analysis
-- Content-based filtering
-- Collaborative filtering
-```
-
-## Step 10: Docker Setup
-
-Create `docker-compose.yml` in root:
-```yaml
-version: '3.8'
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: skincare_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  mongodb:
-    image: mongo:6
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  mongodb_data:
-  redis_data:
-```
-
-## Step 11: VS Code Workspace Configuration
-
-Create `.vscode/launch.json`:
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Launch API Gateway",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/services/api-gateway",
-      "cwd": "${workspaceFolder}/services/api-gateway"
-    },
-    {
-      "name": "Launch Product Service",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/services/product-service",
-      "cwd": "${workspaceFolder}/services/product-service"
-    }
-  ]
-}
-```
-
-Create `.vscode/tasks.json`:
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Start Frontend",
-      "type": "shell",
-      "command": "npm run dev",
-      "options": {
-        "cwd": "${workspaceFolder}/frontend"
-      },
-      "group": "build"
-    },
-    {
-      "label": "Start Databases",
-      "type": "shell",
-      "command": "docker-compose up -d",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build"
-    }
-  ]
-}
-```
-
-## Step 12: Environment Files Setup
-
-Create environment template files:
-
-`frontend/.env.example`:
-```
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_APP_NAME=Skincare Store
-```
-
-`services/api-gateway/.env.example`:
-```
-PORT=8080
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=password123
-DB_NAME=skincare_products
-JWT_SECRET=your-jwt-secret-key
-REDIS_URL=redis://localhost:6379
-```
-
-## Step 13: GitHub Repository Setup
-
-```bash
-git add .
-```
-
-```bash
-git commit -m "Initial project setup with microservices architecture"
-```
-
-Create repository on GitHub, then:
-
-```bash
-git remote add origin https://github.com/yourusername/skincare-ecommerce.git
-```
-
-```bash
-git branch -M main
-```
-
-```bash
-git push -u origin main
-```
-
-## Step 14: Development Scripts
-
-Create `package.json` in root for convenience:
-```json
-{
-  "name": "skincare-ecommerce",
-  "version": "1.0.0",
-  "scripts": {
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:db": "docker-compose up -d",
-    "dev:api": "cd services/api-gateway && go run main.go",
-    "dev:ml": "cd services/ml-service && venv\\Scripts\\activate && uvicorn main:app --reload --port 8001",
-    "install:frontend": "cd frontend && npm install",
-    "install:ml": "cd services/ml-service && pip install -r requirements.txt"
-  }
-}
-```
-
-## Step 15: Database Setup with DBeaver
-
-1. **Install DBeaver** from https://dbeaver.io/
-2. **Start PostgreSQL**:
-```bash
-docker-compose up -d postgres
-```
-
-3. **Connect in DBeaver**:
-   - Host: localhost
-   - Port: 5432
-   - Database: skincare_db
-   - Username: postgres
-   - Password: password123
-
-## Development Workflow on Windows:
-
-1. **Start databases**:
-```bash
-docker-compose up -d
-```
-
-2. **Start services** (in separate Command Prompt/PowerShell windows):
-```bash
-# Terminal 1 - Frontend
-cd frontend
-npm run dev
-
-# Terminal 2 - API Gateway
-cd services\api-gateway
-go run main.go
-
-# Terminal 3 - ML Service
-cd services\ml-service
-venv\Scripts\activate
-uvicorn main:app --reload --port 8001
-```
-
-## Git Workflow:
-```bash
-# Daily workflow
-git pull origin main
-# Make changes
-git add .
-git commit -m "Your commit message"
-git push origin main
