@@ -650,7 +650,7 @@ export default function Home() {
               {/* Stock Status */}
               {!product.in_stock && (
                 <div className="absolute top-6 right-6 left-6 z-20 bg-[#A2574F]/90 backdrop-blur-sm text-white text-center py-3 rounded-2xl font-bold text-sm">
-                  Currently Unavailable
+                  Out of Stock
                 </div>
               )}
 
@@ -932,7 +932,7 @@ export default function Home() {
                     </span>
                     {!quickViewProduct.in_stock && (
                       <span className="bg-gradient-to-r from-[#A2574F]/10 to-[#993A8B]/10 text-[#A2574F] px-4 py-2 rounded-full text-sm font-medium border border-[#A2574F]/20">
-                        Currently Unavailable
+                        Out of Stock
                       </span>
                     )}
                   </div>
@@ -1003,7 +1003,7 @@ export default function Home() {
                           disabled={!quickViewProduct.in_stock}
                           className="flex-1 bg-gradient-to-r from-[#E65087] to-[#993A8B] text-white py-5 px-8 rounded-2xl font-semibold text-lg hover:shadow-xl hover:shadow-[#E65087]/25 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {quickViewProduct.in_stock ? 'Buy Now' : 'Currently Unavailable'}
+                          {quickViewProduct.in_stock ? 'Buy Now' : 'Out of Stock'}
                         </button>
                         <button
                           onClick={() => {
