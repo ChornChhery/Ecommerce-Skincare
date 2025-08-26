@@ -564,8 +564,12 @@ export const mockApi = {
           email,
           first_name: "Demo",
           last_name: "User",
+          phone: "+1234567890",
           skin_type: "combination",
           language: "en",
+          date_of_birth: "1990-01-01",
+          gender: "other",
+          profile_image_url: ""
         }
       };
     }
