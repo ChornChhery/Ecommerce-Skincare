@@ -310,6 +310,38 @@ export default function Home() {
     setShowFilters(false);
   };
 
+  const handleBuyNow = (product: Product) => {
+  if (!isAuthenticated) {
+    router.push('/login');
+    return;
+  }
+
+  if (!product.in_stock) {
+    showNotificationMessage('Product is out of stock');
+    return;
+  }
+
+  // Add to cart first (if not already added, or increment)
+  setCart(prev => {
+      const existingItem = prev.find(item => item.product_id === product.id);
+      let updated;
+      if (existingItem) {
+        updated = prev.map(item =>
+      item.product_id === product.id
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    );
+      } else {
+        updated = [...prev, { product_id: product.id, quantity: 1 }];
+      }
+      localStorage.setItem('cart', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Then navigate to checkout
+    router.push('/products');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -648,15 +680,29 @@ export default function Home() {
                           </div>
                         </div>
 
-                        {isAuthenticated ? (
-                          <button
-                            onClick={(e) => handleAddToCart(e, product.id)}
-                            disabled={!product.in_stock}
-                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {product.in_stock ? 'Add to Cart' : 'Unavailable'}
-                          </button>
-                        ) : (
+                  {isAuthenticated ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBuyNow(product);
+                        }}
+                        disabled={!product.in_stock}
+                        className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        {product.in_stock ? 'Buy Now' : 'Unavailable'}
+                      </button>
+                      <button
+                        onClick={(e) => handleAddToCart(e, product.id)}
+                        disabled={!product.in_stock}
+                        className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
