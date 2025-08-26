@@ -188,14 +188,13 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex justify-center items-center min-h-[80vh]">
           <div className="relative">
-            <div className="w-20 h-20 border-4 border-green-100 border-t-green-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-l-blue-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDelay: '0.3s' }}></div>
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="mt-6 text-center">
-              <div className="text-lg font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              <div className="text-lg font-semibold text-gray-700">
                 Loading Your Cart...
               </div>
             </div>
@@ -207,43 +206,43 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Floating background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-green-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="relative z-10 container mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
-              <span className="text-2xl">🛒</span>
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h7M17 18a1 1 0 100 2 1 1 0 000-2zm-8 0a1 1 0 100 2 1 1 0 000-2z" />
+              </svg>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 via-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
               Shopping Cart
             </h1>
           </div>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Review your selected skincare products
           </p>
         </div>
 
         {cartItems.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-8xl mb-6">🛒</div>
-            <h3 className="text-3xl font-bold text-slate-600 mb-4">
+            <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h7M17 18a1 1 0 100 2 1 1 0 000-2zm-8 0a1 1 0 100 2 1 1 0 000-2z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Your cart is empty
             </h3>
-            <p className="text-slate-500 text-lg mb-8">
+            <p className="text-gray-600 text-lg mb-8">
               Add some amazing skincare products to get started!
             </p>
             <button
               onClick={handleContinueShopping}
-              className="px-8 py-4 bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               Start Shopping
             </button>
@@ -253,12 +252,12 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-800">
+                <h2 className="text-2xl font-bold text-gray-900">
                   Cart Items ({cartItems.length})
                 </h2>
                 <button
                   onClick={handleContinueShopping}
-                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
                 >
                   ← Continue Shopping
                 </button>
@@ -267,14 +266,14 @@ export default function CartPage() {
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white/70 backdrop-blur-sm rounded-3xl border border-white/60 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
+                  className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden ${
                     removingItems.has(item.id) ? 'opacity-50 scale-95' : ''
                   }`}
                 >
                   <div className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Product Image */}
-                      <div className="relative w-full md:w-32 h-32 rounded-2xl overflow-hidden">
+                      <div className="relative w-full md:w-32 h-32 rounded-lg overflow-hidden">
                         <img
                           src={item.product_image}
                           alt={item.product_name}
@@ -293,11 +292,11 @@ export default function CartPage() {
                       <div className="flex-1">
                         <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                           <div className="flex-1">
-                            <span className="text-sm text-slate-500 capitalize">{item.category}</span>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">
+                            <span className="text-sm text-gray-500 capitalize">{item.category}</span>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
                               {item.product_name}
                             </h3>
-                            <p className="text-slate-600 text-sm line-clamp-2 mb-4">
+                            <p className="text-gray-600 text-sm line-clamp-2 mb-4">
                               {item.description}
                             </p>
                             
@@ -319,18 +318,18 @@ export default function CartPage() {
                             <div className="flex items-center justify-between">
                               {/* Quantity Controls */}
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-slate-600">Qty:</span>
-                                <div className="flex items-center border border-slate-200 rounded-lg">
+                                <span className="text-sm font-medium text-gray-600">Qty:</span>
+                                <div className="flex items-center border border-gray-300 rounded-lg">
                                   <button
                                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                     disabled={item.quantity <= 1 || updatingItems.has(item.id) || !item.in_stock}
-                                    className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-l-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-l-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     -
                                   </button>
                                   <span className="w-12 h-8 flex items-center justify-center font-semibold text-sm">
                                     {updatingItems.has(item.id) ? (
-                                      <div className="w-3 h-3 border border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                                      <div className="w-3 h-3 border border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
                                     ) : (
                                       item.quantity
                                     )}
@@ -338,7 +337,7 @@ export default function CartPage() {
                                   <button
                                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                     disabled={updatingItems.has(item.id) || !item.in_stock}
-                                    className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-r-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-r-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     +
                                   </button>
@@ -349,14 +348,14 @@ export default function CartPage() {
                               <div className="flex items-center space-x-3">
                                 <button
                                   onClick={() => handleViewProduct(item.product_id)}
-                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
                                 >
                                   View Product
                                 </button>
                                 <button
                                   onClick={() => removeFromCart(item.id)}
                                   disabled={removingItems.has(item.id)}
-                                  className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+                                  className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
                                 >
                                   {removingItems.has(item.id) ? 'Removing...' : 'Remove'}
                                 </button>
@@ -366,10 +365,10 @@ export default function CartPage() {
 
                           {/* Price */}
                           <div className="text-right">
-                            <div className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+                            <div className="text-2xl font-bold text-blue-600">
                               ${(item.price * item.quantity).toFixed(2)}
                             </div>
-                            <div className="text-sm text-slate-500">
+                            <div className="text-sm text-gray-500">
                               ${item.price.toFixed(2)} each
                             </div>
                           </div>
@@ -383,16 +382,16 @@ export default function CartPage() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/60 shadow-lg p-6 sticky top-8">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">Order Summary</h2>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sticky top-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
                 
                 {/* Promo Code */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-slate-700">Promo Code</span>
+                    <span className="font-medium text-gray-700">Promo Code</span>
                     <button
                       onClick={() => setShowPromoInput(!showPromoInput)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
                       {showPromoInput ? 'Cancel' : 'Add Code'}
                     </button>
@@ -405,7 +404,7 @@ export default function CartPage() {
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
                         placeholder="Enter promo code"
-                        className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <button
                         onClick={applyPromoCode}
@@ -425,7 +424,7 @@ export default function CartPage() {
 
                 {/* Summary Breakdown */}
                 <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-slate-600">
+                  <div className="flex justify-between text-gray-600">
                     <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
@@ -437,20 +436,20 @@ export default function CartPage() {
                     </div>
                   )}
                   
-                  <div className="flex justify-between text-slate-600">
+                  <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
                     <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
                   </div>
                   
-                  <div className="flex justify-between text-slate-600">
+                  <div className="flex justify-between text-gray-600">
                     <span>Tax</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
                   
-                  <div className="border-t border-slate-200 pt-3">
+                  <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-slate-800">Total</span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+                      <span className="text-xl font-bold text-gray-900">Total</span>
+                      <span className="text-2xl font-bold text-blue-600">
                         ${total.toFixed(2)}
                       </span>
                     </div>
@@ -470,7 +469,7 @@ export default function CartPage() {
                 <button
                   onClick={handleCheckout}
                   disabled={cartItems.some(item => !item.in_stock)}
-                  className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-green-200/50 transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {cartItems.some(item => !item.in_stock) 
                     ? 'Remove Out of Stock Items to Checkout'
@@ -479,8 +478,10 @@ export default function CartPage() {
                 </button>
 
                 {/* Security Info */}
-                <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-slate-500">
-                  <span>🔒</span>
+                <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
                   <span>Secure checkout guaranteed</span>
                 </div>
               </div>

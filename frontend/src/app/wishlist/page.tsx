@@ -171,14 +171,13 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex justify-center items-center min-h-[80vh]">
           <div className="relative">
-            <div className="w-20 h-20 border-4 border-pink-100 border-t-pink-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-l-purple-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDelay: '0.3s' }}></div>
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="mt-6 text-center">
-              <div className="text-lg font-semibold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <div className="text-lg font-semibold text-gray-700">
                 Loading Your Wishlist...
               </div>
             </div>
@@ -190,43 +189,43 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Floating background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-pink-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="relative z-10 container mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
-              <span className="text-2xl">💝</span>
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
               My Wishlist
             </h1>
           </div>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Your favorite skincare products saved for later
           </p>
         </div>
 
         {wishlistItems.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-8xl mb-6">💝</div>
-            <h3 className="text-3xl font-bold text-slate-600 mb-4">
+            <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Your wishlist is empty
             </h3>
-            <p className="text-slate-500 text-lg mb-8">
+            <p className="text-gray-600 text-lg mb-8">
               Start adding products you love to keep track of them!
             </p>
             <button
               onClick={() => router.push('/')}
-              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               Discover Products
             </button>
@@ -236,11 +235,11 @@ export default function WishlistPage() {
             {/* Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div className="flex items-center space-x-4">
-                <span className="text-slate-600 font-medium">
+                <span className="text-gray-700 font-medium">
                   {wishlistItems.length} item{wishlistItems.length > 1 ? 's' : ''} saved
                 </span>
-                <div className="h-4 w-px bg-slate-300"></div>
-                <span className="text-sm text-slate-500">
+                <div className="h-4 w-px bg-gray-300"></div>
+                <span className="text-sm text-gray-500">
                   {wishlistItems.filter(item => item.in_stock).length} in stock
                 </span>
               </div>
@@ -249,7 +248,7 @@ export default function WishlistPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -261,7 +260,7 @@ export default function WishlistPage() {
                 <button
                   onClick={handleMoveAllToCart}
                   disabled={wishlistItems.filter(item => item.in_stock).length === 0}
-                  className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add All to Cart
                 </button>
@@ -273,8 +272,8 @@ export default function WishlistPage() {
               {sortedItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white/70 backdrop-blur-sm rounded-3xl border border-white/60 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group ${
-                    removingItems.has(item.id) ? 'opacity-50 scale-95' : 'hover:scale-[1.02]'
+                  className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group ${
+                    removingItems.has(item.id) ? 'opacity-50 scale-95' : 'hover:shadow-lg'
                   }`}
                 >
                   {/* Product Image */}
@@ -298,12 +297,14 @@ export default function WishlistPage() {
                     <button
                       onClick={() => handleRemoveFromWishlist(item.id)}
                       disabled={removingItems.has(item.id)}
-                      className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                      className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 shadow-sm border border-gray-200 opacity-0 group-hover:opacity-100"
                     >
                       {removingItems.has(item.id) ? (
                         <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin"></div>
                       ) : (
-                        <span className="text-lg">×</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       )}
                     </button>
                     
@@ -318,11 +319,11 @@ export default function WishlistPage() {
                   {/* Product Info */}
                   <div className="p-6">
                     <div className="mb-4">
-                      <span className="text-sm text-slate-500 capitalize">{item.category} • {item.brand}</span>
-                      <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2">
+                      <span className="text-sm text-gray-500 capitalize">{item.category}</span>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
                         {item.product_name}
                       </h3>
-                      <p className="text-slate-600 text-sm line-clamp-2 mb-3">
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-3">
                         {item.description}
                       </p>
                       
@@ -331,7 +332,7 @@ export default function WishlistPage() {
                         <div className="flex">
                           {renderStars(item.rating)}
                         </div>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm text-gray-500">
                           {item.rating} ({item.review_count} reviews)
                         </span>
                       </div>
@@ -339,18 +340,18 @@ export default function WishlistPage() {
 
                     {/* Price */}
                     <div className="flex items-center space-x-2 mb-4">
-                      <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+                      <span className="text-xl font-bold text-blue-600">
                         ${item.price.toFixed(2)}
                       </span>
                       {item.original_price && item.original_price > item.price && (
-                        <span className="text-lg text-slate-400 line-through">
+                        <span className="text-lg text-gray-400 line-through">
                           ${item.original_price.toFixed(2)}
                         </span>
                       )}
                     </div>
 
                     {/* Added Date */}
-                    <div className="text-xs text-slate-400 mb-4">
+                    <div className="text-xs text-gray-400 mb-4">
                       Added {new Date(item.added_date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -363,9 +364,9 @@ export default function WishlistPage() {
                       <button
                         onClick={() => handleAddToCart(item)}
                         disabled={!item.in_stock}
-                        className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                        className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
                           item.in_stock
-                            ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         }`}
                       >
@@ -374,7 +375,7 @@ export default function WishlistPage() {
                       
                       <button
                         onClick={() => handleViewProduct(item.product_id)}
-                        className="px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all duration-300"
+                        className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
                       >
                         View
                       </button>
