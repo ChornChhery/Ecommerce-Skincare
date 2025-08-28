@@ -41,7 +41,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await mockAdminApi.getAllProducts();
+      const response = await mockAdminApi.getAdminProducts(1, 100);
       const enhancedProducts = response.data.map((product: Product) => ({
         ...product,
         in_stock: Math.random() > 0.1,
@@ -167,10 +167,10 @@ export default function AdminProducts() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-slate-200 rounded w-1/4 animate-pulse"></div>
+        <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-slate-200 rounded animate-pulse"></div>
+            <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -182,12 +182,12 @@ export default function AdminProducts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Products Management</h1>
-          <p className="text-slate-600 mt-1">Manage your skincare product catalog</p>
+          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
+          <p className="text-gray-600 mt-1">Manage your skincare product catalog</p>
         </div>
         <Link
           href="/admin/products/new"
-          className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+          className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -204,19 +204,19 @@ export default function AdminProducts() {
               <span className="text-2xl">🧴</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Products</p>
-              <p className="text-2xl font-bold text-slate-900">{products.length}</p>
+              <p className="text-sm font-medium text-gray-600">Total Products</p>
+              <p className="text-2xl font-bold text-gray-900">{products.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">✅</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">In Stock</p>
+              <p className="text-sm font-medium text-gray-600">In Stock</p>
               <p className="text-2xl font-bold text-green-600">
                 {products.filter(p => p.in_stock).length}
               </p>
@@ -224,13 +224,13 @@ export default function AdminProducts() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">⚠️</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Low Stock</p>
+              <p className="text-sm font-medium text-gray-600">Low Stock</p>
               <p className="text-2xl font-bold text-orange-600">
                 {products.filter(p => (p.stock_count || 0) <= 5 && p.in_stock).length}
               </p>
@@ -238,13 +238,13 @@ export default function AdminProducts() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">❌</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Out of Stock</p>
+              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
               <p className="text-2xl font-bold text-red-600">
                 {products.filter(p => !p.in_stock).length}
               </p>
@@ -258,16 +258,16 @@ export default function AdminProducts() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Search Products</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
             <div className="relative">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by name, category..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -275,7 +275,7 @@ export default function AdminProducts() {
 
           {/* Category Filter */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -291,7 +291,7 @@ export default function AdminProducts() {
 
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Stock Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -306,9 +306,9 @@ export default function AdminProducts() {
 
           {/* Results */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Results</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Results</label>
             <div className="flex items-center py-2">
-              <span className="text-slate-600">
+              <span className="text-gray-600">
                 Showing {currentPageProducts.length} of {filteredProducts.length} products
               </span>
             </div>
@@ -344,7 +344,7 @@ export default function AdminProducts() {
               </button>
               <button
                 onClick={() => setSelectedProducts(new Set())}
-                className="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 text-sm"
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm"
               >
                 Clear Selection
               </button>
@@ -354,10 +354,10 @@ export default function AdminProducts() {
       )}
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left">
                   <input
@@ -367,23 +367,23 @@ export default function AdminProducts() {
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Product</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Category</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Stock</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-slate-600">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Product</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Category</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Price</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Stock</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Status</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-gray-200">
               {currentPageProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-slate-50">
+                <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <input
                       type="checkbox"
                       checked={selectedProducts.has(product.id)}
                       onChange={() => toggleProductSelection(product.id)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                   </td>
                   <td className="px-6 py-4">
@@ -394,21 +394,21 @@ export default function AdminProducts() {
                         className="w-12 h-12 rounded-lg object-cover"
                       />
                       <div>
-                        <p className="font-medium text-slate-900">{product.name_en}</p>
-                        <p className="text-sm text-slate-500 line-clamp-1">{product.description_en}</p>
+                        <p className="font-medium text-gray-900">{product.name_en}</p>
+                        <p className="text-sm text-gray-500 line-clamp-1">{product.description_en}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-slate-100 text-slate-800 rounded-full capitalize">
+                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full capitalize">
                       {product.category}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-medium text-slate-900">{formatCurrency(product.price)}</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(product.price)}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-slate-900">{product.stock_count || 0}</span>
+                    <span className="text-gray-900">{product.stock_count || 0}</span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -450,8 +450,8 @@ export default function AdminProducts() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-            <div className="text-sm text-slate-600">
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
               Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} results
             </div>
             <div className="flex items-center space-x-2">
@@ -482,7 +482,7 @@ export default function AdminProducts() {
                     className={`px-3 py-1 rounded-md text-sm ${
                       currentPage === pageNum
                         ? 'bg-blue-600 text-white'
-                        : 'border border-slate-300 hover:bg-slate-50'
+                        : 'border border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     {pageNum}
@@ -504,10 +504,10 @@ export default function AdminProducts() {
 
       {/* Empty State */}
       {filteredProducts.length === 0 && (
-        <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">No products found</h3>
-          <p className="text-slate-600 mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+          <p className="text-gray-600 mb-6">
             {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
               ? 'Try adjusting your filters to see more results.'
               : 'Get started by adding your first product.'
@@ -520,14 +520,14 @@ export default function AdminProducts() {
                 setCategoryFilter('all');
                 setStatusFilter('all');
               }}
-              className="px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               Clear Filters
             </button>
           ) : (
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -548,9 +548,9 @@ export default function AdminProducts() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">Delete Product</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Delete Product</h3>
             </div>
-            <p className="text-slate-600 mb-6">
+            <p className="text-gray-600 mb-6">
               Are you sure you want to delete this product? This action cannot be undone.
             </p>
             <div className="flex space-x-3">
@@ -562,7 +562,7 @@ export default function AdminProducts() {
               </button>
               <button
                 onClick={() => setShowDeleteModal(null)}
-                className="flex-1 px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>

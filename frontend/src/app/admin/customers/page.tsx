@@ -47,7 +47,7 @@ export default function CustomersPage() {
       case 'oily':
         return 'bg-blue-100 text-blue-800';
       case 'combination':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-blue-100 text-blue-800';
       case 'sensitive':
         return 'bg-red-100 text-red-800';
       case 'normal':

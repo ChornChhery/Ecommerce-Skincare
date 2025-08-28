@@ -63,7 +63,7 @@ export default function AdminLogin() {
             {/* Header Section */}
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
                   <span className="text-3xl">🧴</span>
                 </div>
               </div>
@@ -103,7 +103,7 @@ export default function AdminLogin() {
                       name="email"
                       type="email"
                       required
-                      className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Enter your admin email"
                       value={formData.email}
                       onChange={handleChange}
@@ -127,7 +127,7 @@ export default function AdminLogin() {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       required
-                      className="w-full pl-12 pr-12 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      className="w-full pl-12 pr-12 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Enter your admin password"
                       value={formData.password}
                       onChange={handleChange}
@@ -157,11 +157,11 @@ export default function AdminLogin() {
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 text-purple-600 bg-white border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                   />
                   <span className="text-gray-600">Remember admin session</span>
                 </label>
-                <span className="text-purple-600 font-medium">
+                <span className="text-blue-600 font-medium">
                   🔒 Secure Access
                 </span>
               </div>
@@ -170,7 +170,7 @@ export default function AdminLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 {loading ? (
                   <>
@@ -192,7 +192,7 @@ export default function AdminLogin() {
             <div className="text-center pt-4 border-t border-gray-200">
               <button
                 onClick={() => router.push('/')}
-                className="text-gray-600 text-sm hover:text-purple-600 transition-colors inline-flex items-center space-x-1"
+                className="text-gray-600 text-sm hover:text-blue-600 transition-colors inline-flex items-center space-x-1"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

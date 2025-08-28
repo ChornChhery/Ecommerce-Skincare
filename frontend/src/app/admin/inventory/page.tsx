@@ -126,15 +126,15 @@ export default function InventoryPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-slate-200 rounded w-1/4 animate-pulse"></div>
+        <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-slate-200 rounded animate-pulse"></div>
+            <div key={i} className="h-24 bg-gray-200 rounded animate-pulse"></div>
           ))}
         </div>
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-slate-200 rounded animate-pulse"></div>
+            <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -146,12 +146,12 @@ export default function InventoryPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Inventory Management</h1>
-          <p className="text-slate-600 mt-1">Monitor and manage your product stock levels</p>
+          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
+          <p className="text-gray-600 mt-1">Monitor and manage your product stock levels</p>
         </div>
         <button
           onClick={fetchProducts}
-          className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+          className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -168,8 +168,8 @@ export default function InventoryPage() {
               <span className="text-2xl">📦</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Products</p>
-              <p className="text-2xl font-bold text-slate-900">{totalProducts}</p>
+              <p className="text-sm font-medium text-gray-600">Total Products</p>
+              <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
             </div>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function InventoryPage() {
               <span className="text-2xl">🚫</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Out of Stock</p>
+              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
               <p className="text-2xl font-bold text-red-600">{outOfStock}</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function InventoryPage() {
               <span className="text-2xl">⚠️</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Low Stock</p>
+              <p className="text-sm font-medium text-gray-600">Low Stock</p>
               <p className="text-2xl font-bold text-orange-600">{lowStock}</p>
             </div>
           </div>

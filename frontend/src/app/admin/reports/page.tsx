@@ -8,7 +8,7 @@ interface ReportData {
   salesByMonth: Array<{ month: string; sales: number; orders: number; }>;
   topProducts: Array<{ name: string; sales: number; quantity: number; }>;
   customerAcquisition: Array<{ month: string; new: number; returning: number; }>;
-  categoryBreakdown: Array<{ name: string; value: number; color: string; }>;
+  categoryBreakdown: Array<{ name: string; value: number; color: string; id?: string; }>;
   revenueByCategory: Array<{ category: string; revenue: number; }>;
   conversionRates: Array<{ date: string; rate: number; visitors: number; }>;
 }
@@ -47,11 +47,11 @@ export default function ReportsPage() {
       { month: 'Jul', new: 28, returning: 43 }
     ],
     categoryBreakdown: [
-      { name: 'Serums', value: 35, color: '#3B82F6' },
-      { name: 'Moisturizers', value: 25, color: '#10B981' },
-      { name: 'Cleansers', value: 20, color: '#F59E0B' },
-      { name: 'Sunscreens', value: 12, color: '#EF4444' },
-      { name: 'Treatments', value: 8, color: '#8B5CF6' }
+      { name: 'Serums', value: 35, color: '#3B82F6', id: 'serums' },
+      { name: 'Moisturizers', value: 25, color: '#10B981', id: 'moisturizers' },
+      { name: 'Cleansers', value: 20, color: '#F59E0B', id: 'cleansers' },
+      { name: 'Sunscreens', value: 12, color: '#EF4444', id: 'sunscreens' },
+      { name: 'Treatments', value: 8, color: '#8B5CF6', id: 'treatments' }
     ],
     revenueByCategory: [
       { category: 'Serums', revenue: 18500 },
@@ -121,15 +121,15 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-slate-200 rounded w-1/4 animate-pulse"></div>
+        <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-slate-200 rounded animate-pulse"></div>
+            <div key={i} className="h-24 bg-gray-200 rounded animate-pulse"></div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-80 bg-slate-200 rounded animate-pulse"></div>
+            <div key={i} className="h-80 bg-gray-200 rounded animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -141,8 +141,8 @@ export default function ReportsPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to load reports</h3>
-          <p className="text-slate-600 mb-4">There was an error loading the analytics data.</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load reports</h3>
+          <p className="text-gray-600 mb-4">There was an error loading the analytics data.</p>
           <button
             onClick={fetchReportData}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -164,14 +164,14 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Analytics & Reports</h1>
-          <p className="text-slate-600 mt-1">Comprehensive business insights and performance metrics</p>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics & Reports</h1>
+          <p className="text-gray-600 mt-1">Comprehensive business insights and performance metrics</p>
         </div>
         <div className="mt-4 sm:mt-0 flex items-center gap-3">
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="1month">Last Month</option>
             <option value="3months">Last 3 Months</option>
@@ -182,7 +182,7 @@ export default function ReportsPage() {
           <button
             onClick={refreshData}
             disabled={refreshing}
-            className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
@@ -197,53 +197,53 @@ export default function ReportsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalRevenue)}</p>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue)}</p>
               <p className="text-sm text-green-600">+12.5% from last period</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Orders</p>
-              <p className="text-2xl font-bold text-slate-900">{totalOrders.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600">Total Orders</p>
+              <p className="text-2xl font-bold text-gray-900">{totalOrders.toLocaleString()}</p>
               <p className="text-sm text-blue-600">+8.3% from last period</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-orange-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Avg Order Value</p>
-              <p className="text-2xl font-bold text-slate-900">{formatCurrency(avgOrderValue)}</p>
+              <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(avgOrderValue)}</p>
               <p className="text-sm text-orange-600">+3.8% from last period</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Customers</p>
-              <p className="text-2xl font-bold text-slate-900">{totalCustomers}</p>
+              <p className="text-sm font-medium text-gray-600">Total Customers</p>
+              <p className="text-2xl font-bold text-gray-900">{totalCustomers}</p>
               <p className="text-sm text-purple-600">+15.2% from last period</p>
             </div>
           </div>
@@ -253,17 +253,17 @@ export default function ReportsPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sales Trend */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Sales Trend</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Sales Trend</h3>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-sm text-slate-600">Sales</span>
+                <span className="text-sm text-gray-600">Sales</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span className="text-sm text-slate-600">Orders</span>
+                <span className="text-sm text-gray-600">Orders</span>
               </div>
             </div>
           </div>
@@ -284,8 +284,8 @@ export default function ReportsPage() {
         </div>
 
         {/* Category Breakdown */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Sales by Category</h3>
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales by Category</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -293,13 +293,16 @@ export default function ReportsPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={(entry) => {
+                  const percent = entry.percent || 0;
+                  return `${entry.name} ${Math.round(percent * 100)}%`;
+                }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
               >
-                {reportData.categoryBreakdown.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {reportData.categoryBreakdown.map((entry) => (
+                  <Cell key={entry.id || entry.name} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
@@ -308,17 +311,17 @@ export default function ReportsPage() {
         </div>
 
         {/* Customer Acquisition */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Customer Acquisition</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Customer Acquisition</h3>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-sm text-slate-600">New</span>
+                <span className="text-sm text-gray-600">New</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span className="text-sm text-slate-600">Returning</span>
+                <span className="text-sm text-gray-600">Returning</span>
               </div>
             </div>
           </div>
@@ -335,13 +338,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Conversion Rate */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Conversion Rate</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Conversion Rate</h3>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                <span className="text-sm text-slate-600">Rate (%)</span>
+                <span className="text-sm text-gray-600">Rate (%)</span>
               </div>
             </div>
           </div>
@@ -358,8 +361,8 @@ export default function ReportsPage() {
       </div>
 
       {/* Top Products */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Top Performing Products</h3>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Products</h3>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={reportData.topProducts} layout="horizontal">
             <CartesianGrid strokeDasharray="3 3" />
@@ -375,8 +378,8 @@ export default function ReportsPage() {
       </div>
 
       {/* Revenue by Category */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Revenue by Category</h3>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Category</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={reportData.revenueByCategory}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -389,20 +392,20 @@ export default function ReportsPage() {
       </div>
 
       {/* Quick Stats Table */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Statistics</h3>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Statistics</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
             <div className="text-2xl font-bold text-blue-600 mb-1">2.4%</div>
-            <div className="text-sm text-slate-600">Average Conversion Rate</div>
+            <div className="text-sm text-gray-600">Average Conversion Rate</div>
           </div>
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600 mb-1">4.2</div>
-            <div className="text-sm text-slate-600">Average Items per Order</div>
+            <div className="text-sm text-gray-600">Average Items per Order</div>
           </div>
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
             <div className="text-2xl font-bold text-purple-600 mb-1">85%</div>
-            <div className="text-sm text-slate-600">Customer Satisfaction</div>
+            <div className="text-sm text-gray-600">Customer Satisfaction</div>
           </div>
         </div>
       </div>
@@ -411,8 +414,8 @@ export default function ReportsPage() {
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">Export Reports</h3>
-            <p className="text-slate-600">Download detailed analytics reports for offline analysis</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Export Reports</h3>
+            <p className="text-gray-600">Download detailed analytics reports for offline analysis</p>
           </div>
           <div className="flex gap-2">
             <button

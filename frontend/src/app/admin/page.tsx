@@ -136,13 +136,13 @@ export default function ReviewsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="space-y-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -152,7 +152,7 @@ export default function ReviewsPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-purple-600 rounded-full"></div>
+              <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
               <span className="text-sm text-gray-600 font-medium">
                 {pagination.total} total reviews
               </span>
@@ -172,7 +172,7 @@ export default function ReviewsPage() {
                 placeholder="Search reviews by product, customer, or content..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function ReviewsPage() {
                   setStatusFilter(e.target.value);
                   setPagination(prev => ({ ...prev, page: 1 }));
                 }}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -197,7 +197,7 @@ export default function ReviewsPage() {
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
               <option value="all">All Ratings</option>
               <option value="5">5 Stars</option>
@@ -212,9 +212,9 @@ export default function ReviewsPage() {
 
       {/* Bulk Actions */}
       {selectedReviews.length > 0 && (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-8">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span className="text-sm font-medium text-purple-800">
+            <span className="text-sm font-medium text-blue-800">
               {selectedReviews.length} review{selectedReviews.length > 1 ? 's' : ''} selected
             </span>
             <div className="flex flex-wrap items-center gap-2">
@@ -253,7 +253,7 @@ export default function ReviewsPage() {
                   type="checkbox"
                   checked={selectedReviews.includes(review.id)}
                   onChange={() => handleSelectReview(review.id)}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <div className="flex-1">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
@@ -373,8 +373,8 @@ export default function ReviewsPage() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-blue-600" />
               </div>
             </div>
             <div className="ml-4">

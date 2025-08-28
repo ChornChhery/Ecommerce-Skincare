@@ -177,7 +177,7 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading admin panel...</p>
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function AdminLayout({
       } lg:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 bg-purple-600 shadow-sm">
+          <div className="flex items-center justify-between h-16 px-6 bg-blue-600 shadow-sm">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-lg">🧴</span>
@@ -230,7 +230,7 @@ export default function AdminLayout({
                 onClick={() => setSidebarOpen(false)} // Close mobile sidebar on navigation
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                   item.current
-                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-600'
+                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
@@ -243,7 +243,7 @@ export default function AdminLayout({
           {/* Admin User Info */}
           <div className="p-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-sm">
                   {adminUser.name.charAt(0).toUpperCase()}
                 </span>
@@ -295,7 +295,7 @@ export default function AdminLayout({
               {/* Quick actions */}
               <Link
                 href="/admin/products/new"
-                className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-sm"
+                className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -320,8 +320,10 @@ export default function AdminLayout({
         </header>
 
         {/* Page content */}
-        <main>
-          {children}
+        <main className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>
