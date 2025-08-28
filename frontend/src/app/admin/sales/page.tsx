@@ -435,8 +435,8 @@ export default function SalesAnalyticsPage() {
                 paddingAngle={5}
                 dataKey="value"
               >
-                {categoryData.map((entry) => (
-                  <Cell key={`category-${entry.name}`} fill={COLORS[categoryData.indexOf(entry) % COLORS.length]} />
+                {categoryData.map((entry, index) => (
+                  <Cell key={`category-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip 
@@ -450,11 +450,11 @@ export default function SalesAnalyticsPage() {
             </PieChart>
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-2 mt-4">
-            {categoryData.map((entry) => (
-              <div key={`legend-${entry.name}`} className="flex items-center">
+            {categoryData.map((entry, index) => (
+              <div key={`legend-${index}-${entry.name}`} className="flex items-center">
                 <div 
                   className="w-3 h-3 rounded-full mr-2"
-                  style={{ backgroundColor: COLORS[categoryData.indexOf(entry) % COLORS.length] }}
+                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
                 <span className="text-sm text-slate-600">{entry.name}</span>
               </div>
