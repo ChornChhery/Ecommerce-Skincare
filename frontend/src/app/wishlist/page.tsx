@@ -272,8 +272,9 @@ export default function WishlistPage() {
               {sortedItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group ${
-                    removingItems.has(item.id) ? 'opacity-50 scale-95' : 'hover:shadow-lg'
+                  onClick={() => handleViewProduct(item.product_id)}
+                  className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer ${
+                    removingItems.has(item.id) ? 'opacity-50 scale-95' : 'hover:shadow-lg transform hover:-translate-y-1'
                   }`}
                 >
                   {/* Product Image */}
@@ -295,7 +296,10 @@ export default function WishlistPage() {
                     
                     {/* Remove Button */}
                     <button
-                      onClick={() => handleRemoveFromWishlist(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFromWishlist(item.id);
+                      }}
                       disabled={removingItems.has(item.id)}
                       className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 shadow-sm border border-gray-200 opacity-0 group-hover:opacity-100"
                     >
@@ -362,7 +366,10 @@ export default function WishlistPage() {
                     {/* Action Buttons */}
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleAddToCart(item)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(item);
+                        }}
                         disabled={!item.in_stock}
                         className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
                           item.in_stock
@@ -374,7 +381,10 @@ export default function WishlistPage() {
                       </button>
                       
                       <button
-                        onClick={() => handleViewProduct(item.product_id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewProduct(item.product_id);
+                        }}
                         className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
                       >
                         View

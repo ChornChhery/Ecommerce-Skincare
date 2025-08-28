@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,9 +32,11 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -42,13 +44,25 @@ export default function OrdersPage() {
       return;
     }
 
-    // Mock orders data - replace with your actual API call
+    // Check if redirected from successful checkout
+    if (searchParams.get('success') === 'true') {
+      setShowSuccessMessage(true);
+      // Clear the success parameter from URL
+      router.replace('/orders');
+      // Hide success message after 5 seconds
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+
+    // Load orders from localStorage and mock data
     const fetchOrders = async () => {
       try {
         // Simulating API delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Mock data using your actual products - replace with actual API call
+        // Load user orders from localStorage
+        const userOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+        
+        // Mock data for demonstration (in real app, this would come from API)
         const mockOrders: Order[] = [
           {
             id: 1,
@@ -98,68 +112,12 @@ export default function OrdersPage() {
             ],
             shipping_address: '123 Main St, Hat Yai, Songkhla 90110',
             payment_method: 'PayPal'
-          },
-          {
-            id: 3,
-            order_number: 'ORD-2024-003',
-            date: '2024-01-25',
-            status: 'processing',
-            total: 75.98,
-            items: [
-              {
-                id: 4,
-                product_id: 6,
-                product_name: 'Sunscreen Anessa',
-                product_image: 'https://princesscosmeticsqa.com/cdn/shop/files/shiseido-anessa-perfect-uv-sunscreen-skincare-milk-spf50-pa-60ml-shysydo-anysa-hlyb-alaanay-balbshr-aloaky-mn-alshms-balashaa-fok-albnfsjy-spf50-pa-60-ml-473043.jpg?v=1738160101&width=1946',
-                quantity: 1,
-                price: 39.99,
-                category: 'sunscreen'
-              },
-              {
-                id: 5,
-                product_id: 2,
-                product_name: 'Hydrating Moisturizer',
-                product_image: 'https://images.unsplash.com/photo-1580870069867-74c57ee1bb07?auto=format&fit=crop&w=300&h=300',
-                quantity: 1,
-                price: 35.99,
-                category: 'moisturizer'
-              }
-            ],
-            shipping_address: '123 Main St, Hat Yai, Songkhla 90110',
-            payment_method: 'Credit Card'
-          },
-          {
-            id: 4,
-            order_number: 'ORD-2024-004',
-            date: '2024-01-28',
-            status: 'pending',
-            total: 49.98,
-            items: [
-              {
-                id: 6,
-                product_id: 5,
-                product_name: 'Skinoren',
-                product_image: 'https://www.binsina.ae/media/catalog/product/1/2/12300_1.jpg?optimize=medium&bg-color=255,255,255&fit=bounds&height=600&width=600&canvas=600:600',
-                quantity: 1,
-                price: 29.99,
-                category: 'medicine'
-              },
-              {
-                id: 7,
-                product_id: 7,
-                product_name: 'Ordinary Niacinamide',
-                product_image: 'https://n.nordstrommedia.com/it/032c0fca-afb7-44a2-9a72-732cefc78538.jpeg?h=368&w=240&dpr=2',
-                quantity: 1,
-                price: 19.99,
-                category: 'serum'
-              }
-            ],
-            shipping_address: '123 Main St, Hat Yai, Songkhla 90110',
-            payment_method: 'Bank Transfer'
           }
         ];
         
-        setOrders(mockOrders);
+        // Combine user orders with mock orders (user orders first for newest)
+        const allOrders = [...userOrders, ...mockOrders];
+        setOrders(allOrders);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
       } finally {
@@ -168,7 +126,7 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, searchParams]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -208,13 +166,43 @@ export default function OrdersPage() {
     ? orders 
     : orders.filter(order => order.status === filterStatus);
 
-  const handleReorder = (order: Order) => {
-    console.log('Reordering:', order.id);
-    // Add your reorder logic here
-  };
-
   const handleViewProduct = (productId: number) => {
     router.push(`/products/${productId}`);
+  };
+
+  const handleReorder = async (order: Order) => {
+    try {
+      // In a real app, you would add all items from the order to cart via API
+      // For now, we'll simulate this by adding to localStorage
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      
+      // Add order items to cart
+      const cartItems = order.items.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity
+      }));
+      
+      // Merge with existing cart (avoiding duplicates by updating quantities)
+      cartItems.forEach(newItem => {
+        const existingIndex = existingCart.findIndex((item: any) => item.product_id === newItem.product_id);
+        if (existingIndex >= 0) {
+          existingCart[existingIndex].quantity += newItem.quantity;
+        } else {
+          existingCart.push(newItem);
+        }
+      });
+      
+      localStorage.setItem('cart', JSON.stringify(existingCart));
+      
+      // Show success message
+      alert(`${order.items.length} items added to cart!`);
+      
+      // Optionally redirect to cart
+      router.push('/cart');
+    } catch (error) {
+      console.error('Failed to reorder:', error);
+      alert('Failed to add items to cart. Please try again.');
+    }
   };
 
   if (loading) {
@@ -238,6 +226,31 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="fixed top-20 right-4 z-50 bg-white border-l-4 border-green-500 px-6 py-4 rounded-lg shadow-lg max-w-sm animate-slide-in">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-900">Order placed successfully!</p>
+              <p className="text-sm text-gray-600 mt-1">Your order is being processed and will be shipped soon.</p>
+            </div>
+            <button
+              onClick={() => setShowSuccessMessage(false)}
+              className="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8"
+            >
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+      
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

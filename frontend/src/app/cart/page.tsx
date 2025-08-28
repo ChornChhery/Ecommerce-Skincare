@@ -174,10 +174,21 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    // Replace with actual checkout logic
-    console.log('Proceeding to checkout with items:', cartItems);
-    alert('Proceeding to checkout...');
-    // router.push('/checkout');
+    // Check if all items are in stock
+    const outOfStockItems = cartItems.filter(item => !item.in_stock);
+    if (outOfStockItems.length > 0) {
+      alert('Please remove out of stock items before proceeding to checkout.');
+      return;
+    }
+    
+    // Check if cart is empty
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Add some products before checkout.');
+      return;
+    }
+    
+    // Redirect to checkout page
+    router.push('/checkout');
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
