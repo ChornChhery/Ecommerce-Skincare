@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Upload, X, Save, Camera, Package, FileText, Settings, AlertCircle } from 'lucide-react';
 
 export default function NewProductPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [formData, setFormData] = useState({
     name_en: '',
     price: '',
@@ -37,11 +41,30 @@ export default function NewProductPage() {
     setLoading(true);
 
     try {
+      // Prepare form data for submission
+      const submitData = new FormData();
+      
+      // Add all form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        submitData.append(key, value.toString());
+      });
+      
+      // Add uploaded file if exists
+      if (uploadedFile) {
+        submitData.append('image_file', uploadedFile);
+        // Clear image_url when file is uploaded
+        submitData.set('image_url', '');
+      }
+      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // In a real app, you'd call your API here
-      console.log('Creating product:', formData);
+      console.log('Creating product with data:', {
+        ...formData,
+        hasUploadedFile: !!uploadedFile,
+        uploadedFileName: uploadedFile?.name
+      });
       
       // Redirect to products list
       router.push('/admin/products');
@@ -58,6 +81,76 @@ export default function NewProductPage() {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
+  };
+
+  // File upload handlers
+  const handleFileUpload = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setUploadedFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        // Clear URL input when file is uploaded
+        setFormData(prev => ({ ...prev, image_url: '' }));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please select a valid image file (PNG, JPG, JPEG, GIF)');
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  const removeUploadedFile = () => {
+    setUploadedFile(null);
+    setImagePreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    handleInputChange(e);
+    
+    // Clear uploaded file when URL is provided
+    if (url.trim()) {
+      removeUploadedFile();
+    }
   };
 
   return (
@@ -244,45 +337,131 @@ export default function NewProductPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Product Image</h2>
-                <p className="text-sm text-gray-600">Upload or provide image URL for your product</p>
+                <p className="text-sm text-gray-600">Upload an image file or provide a URL</p>
               </div>
             </div>
           </div>
           <div className="p-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  name="image_url"
-                  value={formData.image_url}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com/product-image.jpg"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white"
-                />
+            <div className="space-y-6">
+              {/* File Upload Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Upload Image File
+                    </label>
+                    <div
+                      className={`relative border-2 border-dashed rounded-xl p-6 transition-all duration-200 cursor-pointer ${
+                        dragActive
+                          ? 'border-purple-400 bg-purple-50'
+                          : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50'
+                      }`}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <div className="text-center">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                          dragActive ? 'bg-purple-200' : 'bg-gray-200'
+                        }`}>
+                          <Upload className={`w-6 h-6 ${
+                            dragActive ? 'text-purple-600' : 'text-gray-400'
+                          }`} />
+                        </div>
+                        <p className={`font-medium mb-1 ${
+                          dragActive ? 'text-purple-700' : 'text-gray-700'
+                        }`}>
+                          {dragActive ? 'Drop your image here' : 'Click to upload or drag and drop'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          PNG, JPG, JPEG, GIF up to 10MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* OR Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500 font-medium">OR</span>
+                  </div>
+                </div>
+
+                {/* URL Input Section */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Image URL
+                  </label>
+                  <input
+                    type="url"
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleUrlChange}
+                    placeholder="https://example.com/product-image.jpg"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                    disabled={!!uploadedFile}
+                  />
+                  {uploadedFile && (
+                    <p className="text-xs text-gray-500 italic">
+                      URL input is disabled when a file is uploaded
+                    </p>
+                  )}
+                </div>
               </div>
-              {formData.image_url ? (
+
+              {/* Image Preview */}
+              {(imagePreview || formData.image_url) && (
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-gray-50">
                   <div className="flex items-start gap-4">
-                    <img
-                      src={formData.image_url}
-                      alt="Product preview"
-                      className="w-32 h-32 object-cover rounded-lg border-2 border-white shadow-lg"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
-                      }}
-                    />
+                    <div className="relative">
+                      <img
+                        src={imagePreview || formData.image_url}
+                        alt="Product preview"
+                        className="w-32 h-32 object-cover rounded-lg border-2 border-white shadow-lg"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+                        }}
+                      />
+                      {uploadedFile && (
+                        <div className="absolute -top-2 -right-2">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-green-700">Image loaded successfully</span>
+                        <span className="text-sm font-medium text-green-700">
+                          {uploadedFile ? 'File uploaded successfully' : 'Image loaded from URL'}
+                        </span>
                       </div>
+                      {uploadedFile && (
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-1">File: {uploadedFile.name}</p>
+                          <p className="text-xs text-gray-500">Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      )}
                       <p className="text-sm text-gray-600 mb-3">This image will be displayed to customers</p>
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                        onClick={uploadedFile ? removeUploadedFile : () => setFormData(prev => ({ ...prev, image_url: '' }))}
                         className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <X className="w-4 h-4" />
@@ -291,13 +470,16 @@ export default function NewProductPage() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {/* No Image State */}
+              {!imagePreview && !formData.image_url && (
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Camera className="w-8 h-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-600 mb-2">No image provided</p>
-                  <p className="text-sm text-gray-500">Add an image URL above to preview</p>
+                  <p className="text-gray-600 mb-2">No image selected</p>
+                  <p className="text-sm text-gray-500">Upload a file or add an image URL above</p>
                 </div>
               )}
             </div>
