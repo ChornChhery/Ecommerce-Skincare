@@ -59,6 +59,9 @@ export default function Toast({ id, type, title, message, duration = 5000, onClo
   const styles = toastStyles[type];
   const IconComponent = toastIcons[type];
 
+  // Debug logging
+  console.log('Toast rendered:', { id, type, title, message, duration });
+
   useEffect(() => {
     // Trigger entrance animation
     setTimeout(() => setIsVisible(true), 50);
@@ -92,16 +95,16 @@ export default function Toast({ id, type, title, message, duration = 5000, onClo
   return (
     <div
       className={`
-        fixed top-4 right-4 z-50 max-w-sm w-full sm:max-w-md md:max-w-lg
-        transform transition-all duration-300 ease-in-out
+        fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full sm:max-w-md md:max-w-lg mx-4
+        transition-all duration-300 ease-in-out
         ${isVisible 
-          ? 'translate-x-0 opacity-100 scale-100' 
-          : 'translate-x-full opacity-0 scale-95'
+          ? 'translate-y-0 opacity-100 scale-100' 
+          : '-translate-y-full opacity-0 scale-95'
         }
       `}
     >
       <div className={`
-        rounded-lg border shadow-lg p-4 relative overflow-hidden
+        rounded-lg border shadow-xl p-4 relative overflow-hidden backdrop-blur-sm
         ${styles.bg}
       `}>
         {/* Progress bar */}
@@ -116,17 +119,17 @@ export default function Toast({ id, type, title, message, duration = 5000, onClo
 
         <div className="flex items-start space-x-3">
           {/* Icon */}
-          <div className="flex-shrink-0">
-            <IconComponent className={`h-5 w-5 ${styles.icon}`} />
+          <div className="flex-shrink-0 mt-0.5">
+            <IconComponent className={`h-6 w-6 ${styles.icon}`} />
           </div>
 
           {/* Content */}
-          <div className="flex-1 min-w-0">
-            <h4 className={`text-sm font-semibold ${styles.title}`}>
+          <div className="flex-1 min-w-0 pr-2">
+            <h4 className={`text-base font-semibold leading-tight ${styles.title}`}>
               {title}
             </h4>
             {message && (
-              <p className={`mt-1 text-sm ${styles.message}`}>
+              <p className={`mt-2 text-sm leading-relaxed ${styles.message}`}>
                 {message}
               </p>
             )}
@@ -138,7 +141,7 @@ export default function Toast({ id, type, title, message, duration = 5000, onClo
               onClick={handleClose}
               className={`
                 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2
-                ${styles.icon} hover:bg-gray-100 focus:ring-gray-500
+                ${styles.icon} hover:bg-white/20 focus:ring-gray-500 transition-colors
               `}
             >
               <span className="sr-only">Dismiss</span>
@@ -157,14 +160,14 @@ export function ToastContainer({ toasts, onClose }: {
   onClose: (id: string) => void 
 }) {
   return (
-    <div className="fixed top-0 right-0 z-50 p-4 space-y-4 pointer-events-none">
-      <div className="space-y-2">
+    <div className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 p-4 space-y-3 pointer-events-none w-full max-w-lg">
+      <div className="space-y-3">
         {toasts.map((toast, index) => (
           <div 
             key={toast.id}
             className="pointer-events-auto"
             style={{ 
-              transform: `translateY(${index * 10}px)`,
+              transform: `translateY(${index * 8}px)`,
               zIndex: 1000 - index 
             }}
           >

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 
 interface OrderItem {
   id: number;
@@ -37,6 +38,7 @@ export default function OrdersPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showSuccess, showError } = useToastActions();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -195,13 +197,18 @@ export default function OrdersPage() {
       localStorage.setItem('cart', JSON.stringify(existingCart));
       
       // Show success message
-      alert(`${order.items.length} items added to cart!`);
+      showSuccess(`${order.items.length} items added to cart!`);
+      
+      // Update navbar counters
+      setTimeout(() => {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }, 0);
       
       // Optionally redirect to cart
       router.push('/cart');
     } catch (error) {
       console.error('Failed to reorder:', error);
-      alert('Failed to add items to cart. Please try again.');
+      showError('Failed to add items to cart. Please try again.');
     }
   };
 
