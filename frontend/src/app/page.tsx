@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { mockApi } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import RecentlyViewedProducts, { addToRecentlyViewed } from '@/components/RecentlyViewedProducts';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 
 interface Product {
@@ -57,7 +59,6 @@ export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [showNotification, setShowNotification] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(16);
@@ -71,6 +72,7 @@ export default function Home() {
   });
 
   const { user, isAuthenticated } = useAuth();
+  const toastActions = useToastActions();
   const router = useRouter();
 
   const categoryConfig: Record<string, { icon: string }> = {
@@ -89,9 +91,11 @@ export default function Home() {
     'medicine': { icon: '💊' }
   };
 
-  const enhanceProductData = (products: Product[]): Product[] => {
+  const enhanceProductData = (products: any[]): Product[] => {
     return products.map(product => ({
       ...product,
+      name_th: product.name_th || product.name_en,
+      name_kh: product.name_kh || product.name_en,
       in_stock: Math.random() > 0.1,
       stock_count: Math.floor(Math.random() * 50) + 1,
       original_price: Math.random() > 0.6 ? Math.round(product.price * (1.2 + Math.random() * 0.5) * 100) / 100 : undefined,
@@ -208,20 +212,9 @@ export default function Home() {
     return product.name_en;
   };
 
-  const showNotificationMessage = (message: string) => {
-    setShowNotification(message);
-    setTimeout(() => setShowNotification(''), 3000);
-  };
-
-  const addToRecentlyViewed = (product: Product) => {
+  const handleAddToRecentlyViewed = (product: Product) => {
     if (!isAuthenticated) return;
-    
-    setRecentlyViewed(prev => {
-      const filtered = prev.filter(p => p.id !== product.id);
-      const updated = [product, ...filtered].slice(0, 8);
-      localStorage.setItem('recentlyViewed', JSON.stringify(updated));
-      return updated;
-    });
+    addToRecentlyViewed(product);
   };
 
   const handleProductClick = (productId: number) => {
@@ -230,14 +223,14 @@ export default function Home() {
       return;
     }
     const product = products.find(p => p.id === productId);
-    if (product) addToRecentlyViewed(product);
+    if (product) handleAddToRecentlyViewed(product);
     router.push(`/products/${productId}`);
   };
 
   const handleQuickView = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
     setQuickViewProduct(product);
-    addToRecentlyViewed(product);
+    handleAddToRecentlyViewed(product);
   };
 
   const handleAddToCart = (e: React.MouseEvent, productId: number) => {
@@ -249,7 +242,7 @@ export default function Home() {
 
     const product = products.find(p => p.id === productId);
     if (!product?.in_stock) {
-      showNotificationMessage('Product is out of stock');
+      toastActions.outOfStock(product?.name_en || 'Product');
       return;
     }
 
@@ -271,7 +264,7 @@ export default function Home() {
       return updated;
     });
 
-    showNotificationMessage('Added to cart successfully');
+    toastActions.addedToCart(product.name_en);
   };
 
   const toggleFavorite = (e: React.MouseEvent, productId: number) => {
@@ -281,14 +274,15 @@ export default function Home() {
       return;
     }
 
+    const product = products.find(p => p.id === productId);
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(productId)) {
         newFavorites.delete(productId);
-        showNotificationMessage('Removed from favorites');
+        toastActions.removedFromWishlist(product?.name_en || 'Product');
       } else {
         newFavorites.add(productId);
-        showNotificationMessage('Added to favorites');
+        toastActions.addedToWishlist(product?.name_en || 'Product');
       }
       localStorage.setItem('favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
@@ -317,7 +311,7 @@ export default function Home() {
   }
 
   if (!product.in_stock) {
-    showNotificationMessage('Product is out of stock');
+    toastActions.outOfStock(product.name_en);
     return;
   }
 
@@ -338,7 +332,7 @@ export default function Home() {
       return updated;
     });
 
-    // Then navigate to checkout
+    // Then navigate to products page
     router.push('/products');
   };
 
@@ -381,11 +375,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {showNotification && (
-        <div className="fixed top-20 right-4 z-50 bg-white border-l-4 border-green-500 px-6 py-4 rounded-lg shadow-lg max-w-sm">
-          <p className="text-gray-800 font-medium">{showNotification}</p>
-        </div>
-      )}
 
       <Navbar />
       
@@ -538,36 +527,8 @@ export default function Home() {
           </div>
 
           <div className="flex-1">
-            {recentlyViewed.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Recently Viewed</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-                  {recentlyViewed.map((product) => (
-                    <div
-                      key={`recent-${product.id}`}
-                      onClick={() => handleProductClick(product.id)}
-                      className="group cursor-pointer"
-                    >
-                      <div className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow">
-                        <div className="aspect-square rounded-md overflow-hidden mb-3">
-                          <img
-                            src={product.image_url}
-                            alt={getProductName(product)}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                          />
-                        </div>
-                        <h3 className="text-xs font-medium text-gray-900 line-clamp-2 mb-1">
-                          {getProductName(product)}
-                        </h3>
-                        <p className="text-sm font-bold text-blue-600">
-                          ${product.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Recently Viewed Products */}
+            <RecentlyViewedProducts className="mb-12" />
             
             {displayedProducts.length > 0 ? (
               <>
