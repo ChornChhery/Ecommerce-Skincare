@@ -5,7 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { mockApi, mockReviews } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ProductImageGallery from '@/components/ProductImageGallery';
+import RecentlyViewedProducts, { addToRecentlyViewed } from '@/components/RecentlyViewedProducts';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 
 interface Product {
   id: number;
@@ -52,15 +55,14 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [showNotification, setShowNotification] = useState('');
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
   
   const { user, isAuthenticated } = useAuth();
+  const toastActions = useToastActions();
   const params = useParams();
   const router = useRouter();
   
@@ -135,10 +137,8 @@ export default function ProductPage() {
           }
           if (savedCart) setCart(JSON.parse(savedCart));
 
-          const savedRecentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-          const filteredRecentlyViewed = savedRecentlyViewed.filter((p: Product) => p.id !== productId);
-          const updatedRecentlyViewed = [enhancedProduct, ...filteredRecentlyViewed].slice(0, 8);
-          localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
+          // Add to recently viewed
+          addToRecentlyViewed(enhancedProduct);
         } else {
           setError('Product not found');
         }
@@ -164,22 +164,17 @@ export default function ProductPage() {
     return product.description_en;
   };
 
-  const showNotificationMessage = (message: string) => {
-    setShowNotification(message);
-    setTimeout(() => setShowNotification(''), 3000);
-  };
-
   const handleAddToCart = async (productToAdd?: Product, quantityToAdd: number = 1) => {
     const targetProduct = productToAdd || product;
     const targetProductId = targetProduct?.id;
     
     if (!targetProduct || !targetProduct.in_stock) {
-      showNotificationMessage('Product is out of stock');
+      toastActions.outOfStock(targetProduct?.name_en || 'Product');
       return;
     }
 
     if (!productToAdd && quantity > targetProduct.stock_count!) {
-      showNotificationMessage('Quantity exceeds available stock');
+      toastActions.validationError('Quantity exceeds available stock');
       return;
     }
     
@@ -199,7 +194,7 @@ export default function ProductPage() {
             : item
         );
       } else {
-        updated = [...prev, { product_id: targetProductId, quantity: productToAdd ? quantityToAdd : quantity }];
+        updated = [...prev, { product_id: targetProductId!, quantity: productToAdd ? quantityToAdd : quantity }];
       }
       
       localStorage.setItem('cart', JSON.stringify(updated));
@@ -207,19 +202,19 @@ export default function ProductPage() {
     });
     
     setIsAddingToCart(false);
-    showNotificationMessage('Added to cart successfully');
+    toastActions.addedToCart(targetProduct.name_en);
   };
 
   const handleBuyNow = async (productToBuy?: Product) => {
     const targetProduct = productToBuy || product;
     
     if (!targetProduct || !targetProduct.in_stock) {
-      showNotificationMessage('Product is out of stock');
+      toastActions.outOfStock(targetProduct?.name_en || 'Product');
       return;
     }
 
     if (!productToBuy && quantity > targetProduct.stock_count!) {
-      showNotificationMessage('Quantity exceeds available stock');
+      toastActions.validationError('Quantity exceeds available stock');
       return;
     }
     
@@ -231,17 +226,18 @@ export default function ProductPage() {
     if (e) e.stopPropagation();
     
     const productIdToToggle = targetProductId || productId!;
+    const targetProduct = targetProductId ? relatedProducts.find(p => p.id === targetProductId) : product;
     
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(productIdToToggle)) {
         newFavorites.delete(productIdToToggle);
         if (!targetProductId) setIsFavorite(false);
-        showNotificationMessage('Removed from favorites');
+        toastActions.removedFromWishlist(targetProduct?.name_en || 'Product');
       } else {
         newFavorites.add(productIdToToggle);
         if (!targetProductId) setIsFavorite(true);
-        showNotificationMessage('Added to favorites');
+        toastActions.addedToWishlist(targetProduct?.name_en || 'Product');
       }
       localStorage.setItem('favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
@@ -266,7 +262,7 @@ export default function ProductPage() {
     setNewReview({ rating: 5, comment: '' });
     setShowReviewForm(false);
     
-    showNotificationMessage('Review submitted! It will be visible after moderation.');
+    toastActions.showSuccess('Review Submitted', 'Your review will be visible after moderation');
   };
 
   const calculateDiscount = (originalPrice: number, currentPrice: number): number => {
@@ -358,12 +354,6 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {showNotification && (
-        <div className="fixed top-20 right-4 z-50 bg-white border-l-4 border-green-500 px-6 py-4 rounded-lg shadow-lg max-w-sm">
-          <p className="text-gray-800 font-medium">{showNotification}</p>
-        </div>
-      )}
-
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -383,68 +373,50 @@ export default function ProductPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
-          <div className="space-y-4">
-            <div className="relative aspect-square bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-              <img
-                src={productImages[selectedImage]}
-                alt={getProductName(product)}
-                className={`w-full h-full object-cover transition-all duration-300 ${
-                  !product.in_stock ? 'grayscale opacity-60' : ''
-                }`}
-              />
-              
-              {!product.in_stock && (
-                <div className="absolute top-4 left-4 right-4 z-10 bg-gray-900/90 text-white text-center py-2 rounded-lg font-medium text-sm">
-                  Out of Stock
-                </div>
-              )}
-
-              {product.is_sale && product.sale_percentage && (
-                <div className="absolute top-4 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                  -{product.sale_percentage}% OFF
-                </div>
-              )}
-
-              <div className="absolute bottom-4 left-4">
-                <span className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium bg-gray-900/80 text-white rounded-lg backdrop-blur-sm capitalize">
-                  <span>{categoryConfig[product.category.toLowerCase()]?.icon || '🧴'}</span>
-                  <span>{product.category}</span>
-                </span>
+          <div className="relative">
+            <ProductImageGallery 
+              images={productImages} 
+              productName={getProductName(product)}
+              className=""
+            />
+            
+            {/* Overlays for sale and out of stock */}
+            {!product.in_stock && (
+              <div className="absolute top-4 left-4 right-4 z-20 bg-gray-900/90 text-white text-center py-2 rounded-lg font-medium text-sm">
+                Out of Stock
               </div>
+            )}
 
-              <button
-                onClick={toggleFavorite}
-                className={`absolute top-4 left-4 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg ${
+            {product.is_sale && product.sale_percentage && (
+              <div className="absolute top-4 right-4 z-20 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                -{product.sale_percentage}% OFF
+              </div>
+            )}
+
+            {/* Category badge */}
+            <div className="absolute bottom-20 left-4 z-20">
+              <span className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium bg-gray-900/80 text-white rounded-lg backdrop-blur-sm capitalize">
+                <span>{categoryConfig[product.category.toLowerCase()]?.icon || '🧴'}</span>
+                <span>{product.category}</span>
+              </span>
+            </div>
+
+            {/* Favorite button */}
+            <button
+              onClick={toggleFavorite}
+              className={`
+                absolute top-4 left-4 z-20 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg
+                ${
                   isFavorite
                     ? 'bg-red-500 text-white'
                     : 'bg-white/90 text-gray-600 hover:bg-red-500 hover:text-white'
-                }`}
-              >
-                <svg className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex space-x-3">
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative w-20 h-20 rounded-lg overflow-hidden transition-all ${
-                    selectedImage === index 
-                      ? 'ring-2 ring-blue-500 ring-offset-2' 
-                      : 'opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${getProductName(product)} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+                }
+              `}
+            >
+              <svg className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
           </div>
 
           {/* Product Info */}
@@ -809,6 +781,15 @@ export default function ProductPage() {
             </div>
           </div>
         )}
+        
+        {/* Recently Viewed Products */}
+        <div className="mt-16">
+          <RecentlyViewedProducts 
+            currentProductId={productId || undefined}
+            maxItems={8}
+            className=""
+          />
+        </div>
       </main>
       
       <Footer />

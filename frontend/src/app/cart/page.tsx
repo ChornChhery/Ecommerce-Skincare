@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 import { mockApi, mockProducts } from '@/lib/mockApi';
 
 interface CartItem {
@@ -30,6 +31,7 @@ export default function CartPage() {
   const [showPromoInput, setShowPromoInput] = useState(false);
   
   const { user, isAuthenticated } = useAuth();
+  const toastActions = useToastActions();
   const router = useRouter();
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function CartPage() {
     if (!item) return;
     
     if (item.max_quantity && newQuantity > item.max_quantity) {
-      alert(`Maximum ${item.max_quantity} items available for ${item.product_name}`);
+      toastActions.validationError(`Maximum ${item.max_quantity} items available for ${item.product_name}`);
       return;
     }
 
@@ -106,7 +108,7 @@ export default function CartPage() {
       ));
     } catch (error) {
       console.error('Failed to update quantity:', error);
-      alert('Failed to update quantity. Please try again.');
+      toastActions.genericError('Failed to update quantity. Please try again.');
     } finally {
       setUpdatingItems(prev => {
         const newSet = new Set(prev);
@@ -125,9 +127,14 @@ export default function CartPage() {
       
       // Replace with actual API call
       setCartItems(prev => prev.filter(item => item.id !== itemId));
+      
+      const removedItem = cartItems.find(item => item.id === itemId);
+      if (removedItem) {
+        toastActions.removedFromCart(removedItem.product_name);
+      }
     } catch (error) {
       console.error('Failed to remove item:', error);
-      alert('Failed to remove item. Please try again.');
+      toastActions.genericError('Failed to remove item. Please try again.');
     } finally {
       setRemovingItems(prev => {
         const newSet = new Set(prev);
@@ -155,13 +162,13 @@ export default function CartPage() {
       
       if (discountPercent) {
         setDiscount(discountPercent);
-        alert(`Promo code applied! ${discountPercent}% discount`);
+        toastActions.showSuccess('Promo Code Applied', `${discountPercent}% discount applied to your order`);
       } else {
-        alert('Invalid promo code');
+        toastActions.showError('Invalid Promo Code', 'Please check the code and try again');
       }
     } catch (error) {
       console.error('Failed to apply promo code:', error);
-      alert('Failed to apply promo code. Please try again.');
+      toastActions.genericError('Failed to apply promo code. Please try again.');
     }
   };
 
@@ -177,13 +184,13 @@ export default function CartPage() {
     // Check if all items are in stock
     const outOfStockItems = cartItems.filter(item => !item.in_stock);
     if (outOfStockItems.length > 0) {
-      alert('Please remove out of stock items before proceeding to checkout.');
+      toastActions.showError('Items Out of Stock', 'Please remove out of stock items before proceeding to checkout.');
       return;
     }
     
     // Check if cart is empty
     if (cartItems.length === 0) {
-      alert('Your cart is empty. Add some products before checkout.');
+      toastActions.showError('Cart Empty', 'Add some products before checkout.');
       return;
     }
     
