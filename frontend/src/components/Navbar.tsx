@@ -5,12 +5,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
+interface CartItem {
+  product_id: number;
+  quantity: number;
+}
+
+interface Order {
+  id: string;
+  status: string;
+}
+
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminUser, setAdminUser] = useState<any>(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [ordersCount, setOrdersCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -49,7 +62,99 @@ export default function Navbar() {
       setIsAdminLoggedIn(false);
       setAdminUser(null);
     }
-  }, [pathname]);
+
+    // Initialize counters for authenticated users
+    if (isAuthenticated) {
+      updateCounters();
+    } else {
+      // Reset counters when not authenticated
+      setCartCount(0);
+      setWishlistCount(0);
+      setOrdersCount(0);
+    }
+  }, [pathname, isAuthenticated]);
+
+  // Function to update all counters
+  const updateCounters = () => {
+    // Update cart count
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      try {
+        const cart: CartItem[] = JSON.parse(cartData);
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+      } catch (error) {
+        setCartCount(0);
+      }
+    } else {
+      setCartCount(0);
+    }
+
+    // Update wishlist count
+    const wishlistData = localStorage.getItem('favorites');
+    if (wishlistData) {
+      try {
+        const wishlist = JSON.parse(wishlistData);
+        setWishlistCount(Array.isArray(wishlist) ? wishlist.length : 0);
+      } catch (error) {
+        setWishlistCount(0);
+      }
+    } else {
+      setWishlistCount(0);
+    }
+
+    // Update orders count
+    const ordersData = localStorage.getItem('orders');
+    if (ordersData) {
+      try {
+        const orders: Order[] = JSON.parse(ordersData);
+        setOrdersCount(orders.length);
+      } catch (error) {
+        setOrdersCount(0);
+      }
+    } else {
+      setOrdersCount(0);
+    }
+  };
+
+  // Additional useEffect to ensure counters are loaded on mount
+  useEffect(() => {
+    // Small delay to ensure localStorage is available and updated
+    const initializeCounters = () => {
+      if (isAuthenticated) {
+        updateCounters();
+      }
+    };
+    
+    // Initialize immediately
+    initializeCounters();
+    
+    // Also initialize after a small delay to catch any late updates
+    const timeoutId = setTimeout(initializeCounters, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [isAuthenticated]);
+  useEffect(() => {
+    const handleStorageChange = () => {
+      if (isAuthenticated) {
+        updateCounters();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events that we'll trigger when cart/wishlist changes
+    window.addEventListener('cartUpdated', handleStorageChange);
+    window.addEventListener('wishlistUpdated', handleStorageChange);
+    window.addEventListener('ordersUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleStorageChange);
+      window.removeEventListener('wishlistUpdated', handleStorageChange);
+      window.removeEventListener('ordersUpdated', handleStorageChange);
+    };
+  }, [isAuthenticated]);
 
   const handleUserLogout = () => {
     logout();
@@ -219,11 +324,28 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <>
-                {/* Cart Icon */}
-                <Link href="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                {/* Cart Icon with Counter */}
+                <Link href="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors group">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-red-600 transition-colors">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Wishlist Icon with Counter */}
+                <Link href="/wishlist" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors group">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-pink-600 transition-colors">
+                      {wishlistCount > 99 ? '99+' : wishlistCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* User Profile Dropdown */}
@@ -291,35 +413,56 @@ export default function Navbar() {
                         
                         <Link 
                           href="/orders" 
-                          className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsProfileOpen(false)}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                          </svg>
-                          <span className="text-sm">Orders</span>
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <span className="text-sm">Orders</span>
+                          </div>
+                          {ordersCount > 0 && (
+                            <span className="bg-blue-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                              {ordersCount}
+                            </span>
+                          )}
                         </Link>
 
                         <Link 
                           href="/cart" 
-                          className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsProfileOpen(false)}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          <span className="text-sm">Cart</span>
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span className="text-sm">Cart</span>
+                          </div>
+                          {cartCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                              {cartCount}
+                            </span>
+                          )}
                         </Link>
                         
                         <Link 
                           href="/wishlist" 
-                          className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsProfileOpen(false)}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                          <span className="text-sm">Wishlist</span>
+                          <div className="flex items-center space-x-3">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span className="text-sm">Wishlist</span>
+                          </div>
+                          {wishlistCount > 0 && (
+                            <span className="bg-pink-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                              {wishlistCount}
+                            </span>
+                          )}
                         </Link>
                         
                         <div className="border-t border-gray-100 mt-2 pt-2">
@@ -413,35 +556,56 @@ export default function Navbar() {
                   
                   <Link
                     href="/orders"
-                    className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    Orders
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      Orders
+                    </div>
+                    {ordersCount > 0 && (
+                      <span className="bg-blue-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                        {ordersCount}
+                      </span>
+                    )}
                   </Link>
                   
                   <Link
                     href="/cart"
-                    className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Cart
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Cart
+                    </div>
+                    {cartCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                        {cartCount}
+                      </span>
+                    )}
                   </Link>
                   
                   <Link
                     href="/wishlist"
-                    className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="flex items-center justify-between px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    Wishlist
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      Wishlist
+                    </div>
+                    {wishlistCount > 0 && (
+                      <span className="bg-pink-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
+                        {wishlistCount}
+                      </span>
+                    )}
                   </Link>
                   
                   <Link

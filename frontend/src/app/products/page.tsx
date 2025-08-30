@@ -6,18 +6,23 @@ import { mockApi } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 
 interface Product {
   id: number;
   name_en: string;
-  name_th: string;
-  name_kh: string;
+  name_th?: string;
+  name_kh?: string;
   price: number;
   category: string;
   image_url: string;
   description_en: string;
   description_th?: string;
   description_km?: string;
+  stock?: number;
+  status?: string;
+  skin_type?: string;
+  created_at?: string;
 }
 
 export default function ProductPage() {
@@ -29,6 +34,7 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   
   const { user, isAuthenticated } = useAuth();
+  const toastActions = useToastActions();
   const params = useParams();
   const router = useRouter();
   
@@ -51,10 +57,21 @@ export default function ProductPage() {
       try {
         // Assuming mockApi has a getProduct method, if not we'll get it from getProducts
         const response = await mockApi.getProducts();
-        const foundProduct = response.data.find((p: Product) => p.id === productId);
+        const foundProduct = response.data.find((p: any) => p.id === productId);
         
         if (foundProduct) {
           setProduct(foundProduct);
+          
+          // Check if product is in favorites
+          const currentFavorites = localStorage.getItem('favorites');
+          if (currentFavorites) {
+            try {
+              const favorites = JSON.parse(currentFavorites);
+              setIsFavorite(favorites.includes(foundProduct.id));
+            } catch (error) {
+              setIsFavorite(false);
+            }
+          }
         } else {
           setError('Product not found');
         }
@@ -81,8 +98,46 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = () => {
-    console.log('Add to cart:', productId, 'quantity:', quantity);
-    // Add your cart logic here
+    if (!product) return;
+    
+    const cartItem = {
+      product_id: product.id,
+      quantity: quantity
+    };
+    
+    // Get existing cart
+    const existingCart = localStorage.getItem('cart');
+    let cart = [];
+    
+    if (existingCart) {
+      try {
+        cart = JSON.parse(existingCart);
+      } catch (error) {
+        cart = [];
+      }
+    }
+    
+    // Check if product already exists in cart
+    const existingItemIndex = cart.findIndex((item: any) => item.product_id === product.id);
+    
+    if (existingItemIndex >= 0) {
+      // Update quantity
+      cart[existingItemIndex].quantity += quantity;
+    } else {
+      // Add new item
+      cart.push(cartItem);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Show success message
+    toastActions.addedToCart(getProductName(product));
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }, 0);
   };
 
   const handleBuyNow = () => {
@@ -91,8 +146,45 @@ export default function ProductPage() {
   };
 
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    // Add your favorite logic here
+    if (!product) return;
+    
+    const currentFavorites = localStorage.getItem('favorites');
+    let favorites = [];
+    
+    if (currentFavorites) {
+      try {
+        favorites = JSON.parse(currentFavorites);
+      } catch (error) {
+        favorites = [];
+      }
+    }
+    
+    const isCurrentlyFavorite = favorites.includes(product.id);
+    
+    if (isCurrentlyFavorite) {
+      // Remove from favorites
+      favorites = favorites.filter((id: number) => id !== product.id);
+      setIsFavorite(false);
+    } else {
+      // Add to favorites
+      favorites.push(product.id);
+      setIsFavorite(true);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    
+    // Show feedback message
+    if (isCurrentlyFavorite) {
+      toastActions.removedFromWishlist(getProductName(product));
+    } else {
+      toastActions.addedToWishlist(getProductName(product));
+    }
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    }, 0);
   };
 
   if (loading) {

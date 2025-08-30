@@ -201,6 +201,11 @@ export default function ProductPage() {
       return updated;
     });
     
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }, 0);
+    
     setIsAddingToCart(false);
     toastActions.addedToCart(targetProduct.name_en);
   };
@@ -242,6 +247,11 @@ export default function ProductPage() {
       localStorage.setItem('favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    }, 0);
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {

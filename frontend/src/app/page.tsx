@@ -263,6 +263,11 @@ export default function Home() {
       localStorage.setItem('cart', JSON.stringify(updated));
       return updated;
     });
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }, 0);
 
     toastActions.addedToCart(product.name_en);
   };
@@ -287,6 +292,11 @@ export default function Home() {
       localStorage.setItem('favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    }, 0);
   };
 
   const calculateDiscount = (originalPrice: number, currentPrice: number): number => {
@@ -331,6 +341,11 @@ export default function Home() {
       localStorage.setItem('cart', JSON.stringify(updated));
       return updated;
     });
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cartUpdated'));
+    }, 0);
 
     // Then navigate to products page
     router.push('/products');

@@ -91,6 +91,11 @@ export default function RecentlyViewedProducts({
     
     setFavorites(newFavorites);
     localStorage.setItem('favorites', JSON.stringify([...newFavorites]));
+    
+    // Trigger custom event to update navbar counter after state update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    }, 0);
   };
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
@@ -118,7 +123,13 @@ export default function RecentlyViewedProducts({
       }
       
       localStorage.setItem('cart', JSON.stringify(cart));
+      
       toastActions.addedToCart(product.name_en);
+      
+      // Trigger custom event to update navbar counter after state update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }, 0);
     } catch (error) {
       toastActions.genericError('Failed to add item to cart');
     }

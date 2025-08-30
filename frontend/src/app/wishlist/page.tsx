@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToastActions } from '@/contexts/ToastContext';
 import { mockApi, mockProducts } from '@/lib/mockApi';
 
 interface WishlistItem {
@@ -29,6 +30,7 @@ export default function WishlistPage() {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price_low' | 'price_high' | 'name'>('newest');
   
   const { user, isAuthenticated } = useAuth();
+  const toastActions = useToastActions();
   const router = useRouter();
 
   useEffect(() => {
@@ -99,13 +101,36 @@ export default function WishlistPage() {
     setRemovingItems(prev => new Set(prev).add(itemId));
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Get the item being removed for toast message
+      const item = wishlistItems.find(wishlistItem => wishlistItem.id === itemId);
       
-      // Replace with actual API call
-      setWishlistItems(prev => prev.filter(item => item.id !== itemId));
+      // Update localStorage favorites
+      const currentFavorites = localStorage.getItem('favorites');
+      if (currentFavorites) {
+        try {
+          const favorites = JSON.parse(currentFavorites);
+          const updatedFavorites = favorites.filter((favId: number) => favId !== (item?.product_id || itemId));
+          localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+        } catch (error) {
+          console.error('Failed to update favorites:', error);
+        }
+      }
+      
+      // Show success message with toast
+      if (item) {
+        toastActions.removedFromWishlist(item.product_name);
+      }
+      
+      // Update local state
+      setWishlistItems(prev => prev.filter(wishlistItem => wishlistItem.id !== itemId));
+      
+      // Trigger custom event to update navbar counter after state update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('wishlistUpdated'));
+      }, 0);
     } catch (error) {
       console.error('Failed to remove item:', error);
+      toastActions.genericError('Failed to remove item from wishlist');
     } finally {
       setRemovingItems(prev => {
         const newSet = new Set(prev);
@@ -116,20 +141,51 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = async (item: WishlistItem) => {
-    if (!item.in_stock) return;
+    if (!item.in_stock) {
+      toastActions.outOfStock(item.product_name);
+      return;
+    }
     
     try {
-      // Simulate API call to add to cart
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Get existing cart
+      const existingCart = localStorage.getItem('cart');
+      let cart = [];
       
-      // Replace with actual add to cart logic
-      console.log('Added to cart:', item.product_name);
+      if (existingCart) {
+        try {
+          cart = JSON.parse(existingCart);
+        } catch (error) {
+          cart = [];
+        }
+      }
       
-      // Show success message or update UI
-      alert(`${item.product_name} added to cart!`);
+      // Check if product already exists in cart
+      const existingItemIndex = cart.findIndex((cartItem: any) => cartItem.product_id === item.product_id);
+      
+      if (existingItemIndex >= 0) {
+        // Update quantity
+        cart[existingItemIndex].quantity += 1;
+      } else {
+        // Add new item
+        cart.push({
+          product_id: item.product_id,
+          quantity: 1
+        });
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+      
+      // Show success message
+      toastActions.addedToCart(item.product_name);
+      
+      // Trigger custom event to update navbar counter after state update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }, 0);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
+      toastActions.genericError('Failed to add item to cart');
     }
   };
 
@@ -141,20 +197,52 @@ export default function WishlistPage() {
     const inStockItems = wishlistItems.filter(item => item.in_stock);
     
     if (inStockItems.length === 0) {
-      alert('No items in stock to add to cart.');
+      toastActions.showInfo('No Items Available', 'No items in stock to add to cart.');
       return;
     }
 
     try {
-      // Simulate API call to add all in-stock items to cart
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get existing cart
+      const existingCart = localStorage.getItem('cart');
+      let cart = [];
       
-      // Replace with actual bulk add to cart logic
-      console.log('Added all in-stock items to cart');
-      alert(`${inStockItems.length} items added to cart!`);
+      if (existingCart) {
+        try {
+          cart = JSON.parse(existingCart);
+        } catch (error) {
+          cart = [];
+        }
+      }
+      
+      // Add all in-stock items to cart
+      inStockItems.forEach(item => {
+        const existingItemIndex = cart.findIndex((cartItem: any) => cartItem.product_id === item.product_id);
+        
+        if (existingItemIndex >= 0) {
+          // Update quantity
+          cart[existingItemIndex].quantity += 1;
+        } else {
+          // Add new item
+          cart.push({
+            product_id: item.product_id,
+            quantity: 1
+          });
+        }
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+      
+      // Show success message
+      toastActions.showSuccess('Added to Cart', `${inStockItems.length} items added to cart successfully!`);
+      
+      // Trigger custom event to update navbar counter after state update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }, 0);
     } catch (error) {
       console.error('Failed to add items to cart:', error);
-      alert('Failed to add items to cart. Please try again.');
+      toastActions.genericError('Failed to add items to cart');
     }
   };
 
