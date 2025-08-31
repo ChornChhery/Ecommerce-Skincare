@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
+import ProductImageView from '@/components/ProductImageView';
 
 interface Product {
   id: number;
@@ -16,6 +17,7 @@ interface Product {
   price: number;
   category: string;
   image_url: string;
+  image_urls?: string[];
   description_en: string;
   description_th?: string;
   description_km?: string;
@@ -86,8 +88,8 @@ export default function ProductPage() {
   }, [productId, isAuthenticated, router]);
 
   const getProductName = (product: Product) => {
-    if (user?.language === 'th') return product.name_th;
-    if (user?.language === 'km') return product.name_kh;
+    if (user?.language === 'th') return product.name_th || product.name_en;
+    if (user?.language === 'km') return product.name_kh || product.name_en;
     return product.name_en;
   };
 
@@ -131,8 +133,9 @@ export default function ProductPage() {
     // Save to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // Show success message
-    toastActions.addedToCart(getProductName(product));
+    // Show success message with fallback product name
+    const productName = getProductName(product) || 'Product';
+    toastActions.addedToCart(productName);
     
     // Trigger custom event to update navbar counter after state update
     setTimeout(() => {
@@ -174,11 +177,12 @@ export default function ProductPage() {
     // Save to localStorage
     localStorage.setItem('favorites', JSON.stringify(favorites));
     
-    // Show feedback message
+    // Show feedback message with fallback product name
+    const productName = getProductName(product) || 'Product';
     if (isCurrentlyFavorite) {
-      toastActions.removedFromWishlist(getProductName(product));
+      toastActions.removedFromWishlist(productName);
     } else {
-      toastActions.addedToWishlist(getProductName(product));
+      toastActions.addedToWishlist(productName);
     }
     
     // Trigger custom event to update navbar counter after state update
@@ -263,56 +267,51 @@ export default function ProductPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
           <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative aspect-square bg-white rounded-3xl overflow-hidden border border-white/60 shadow-lg">
-              <img
-                src={productImages[selectedImage]}
-                alt={getProductName(product)}
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Category badge */}
-              <div className="absolute top-6 left-6">
-                <span className="px-4 py-2 text-sm font-bold bg-gradient-to-r from-blue-500/90 to-purple-600/90 text-white rounded-full backdrop-blur-sm capitalize shadow-lg">
-                  {product.category}
-                </span>
-              </div>
-
-              {/* Favorite button */}
-              <button
-                onClick={toggleFavorite}
-                className={`absolute top-6 right-6 w-12 h-12 rounded-full backdrop-blur-md border border-white/30 flex items-center justify-center transition-all duration-300 ${
-                  isFavorite
-                    ? 'bg-red-500 text-white shadow-lg shadow-red-200'
-                    : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
-                }`}
-              >
-                <svg className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
+            {/* Main Image - Using the new ProductImageView component */}
+            <ProductImageView 
+              images={product ? product.image_urls || [product.image_url] : []} 
+              productName={getProductName(product || { name_en: 'Product' })} 
+            />
+            
+            {/* Category badge */}
+            <div className="absolute top-6 left-6">
+              <span className="px-4 py-2 text-sm font-bold bg-gradient-to-r from-blue-500/90 to-purple-600/90 text-white rounded-full backdrop-blur-sm capitalize shadow-lg">
+                {product.category}
+              </span>
             </div>
+
+            {/* Favorite button */}
+            <button
+              onClick={toggleFavorite}
+              className={`absolute top-6 right-6 w-12 h-12 rounded-full backdrop-blur-md border border-white/30 flex items-center justify-center transition-all duration-300 ${
+                isFavorite
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-200'
+                  : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
+              }`}
+            >
+              <svg className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
 
             {/* Image Thumbnails */}
-            <div className="flex space-x-3">
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 ${
-                    selectedImage === index 
-                      ? 'ring-3 ring-blue-500 ring-offset-2' 
-                      : 'opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${getProductName(product)} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {product.image_urls && product.image_urls.length > 1 && (
+              <div className="flex space-x-3">
+                {product.image_urls.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 ${selectedImage === index ? 'ring-3 ring-blue-500 ring-offset-2' : 'opacity-70 hover:opacity-100'}`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${getProductName(product)} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
