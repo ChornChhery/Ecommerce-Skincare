@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { HeartIcon, ShoppingCartIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useToastActions } from '@/contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface Product {
   id: number;
@@ -38,10 +40,12 @@ export default function RecentlyViewedProducts({
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const toastActions = useToastActions();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadRecentlyViewed();
     loadFavorites();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadRecentlyViewed = () => {
@@ -108,7 +112,7 @@ export default function RecentlyViewedProducts({
 
     try {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItem = cart.find((item: any) => item.product_id === product.id);
+      const existingItem = cart.find((item: { product_id: number; quantity: number }) => item.product_id === product.id);
       
       if (existingItem) {
         existingItem.quantity += 1;
@@ -130,7 +134,7 @@ export default function RecentlyViewedProducts({
       setTimeout(() => {
         window.dispatchEvent(new Event('cartUpdated'));
       }, 0);
-    } catch (error) {
+    } catch {
       toastActions.genericError('Failed to add item to cart');
     }
   };
@@ -146,7 +150,7 @@ export default function RecentlyViewedProducts({
       <div className={`${className}`}>
         {showTitle && (
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Recently Viewed</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('recently_viewed', 'Recently Viewed')}</h2>
           </div>
         )}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -163,13 +167,13 @@ export default function RecentlyViewedProducts({
       <div className={`${className}`}>
         {showTitle && (
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Recently Viewed</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('home.recentlyViewed', 'Recently Viewed')}</h2>
           </div>
         )}
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <EyeIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Recently Viewed Products</h3>
-          <p className="text-gray-600">Products you view will appear here for easy access</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('home.noRecentlyViewed', 'No Recently Viewed Products')}</h3>
+          <p className="text-gray-600">{t('home.recentlyViewedDescription', 'Products you view will appear here for easy access')}</p>
         </div>
       </div>
     );
@@ -179,13 +183,13 @@ export default function RecentlyViewedProducts({
     <div className={`${className}`}>
       {showTitle && (
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Recently Viewed</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('home.recentlyViewed', 'Recently Viewed')}</h2>
           {recentlyViewed.length > 0 && (
             <button
               onClick={clearRecentlyViewed}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
             >
-              Clear All
+              {t('clear_all', 'Clear All')}
             </button>
           )}
         </div>
@@ -200,10 +204,11 @@ export default function RecentlyViewedProducts({
           >
             {/* Product Image */}
             <div className="relative aspect-square bg-gray-100 overflow-hidden">
-              <img
+              <Image
                 src={product.image_url}
                 alt={product.name_en}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
               
               {/* Sale Badge */}
@@ -216,7 +221,7 @@ export default function RecentlyViewedProducts({
               {/* Out of Stock Overlay */}
               {!product.in_stock && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">Out of Stock</span>
+                  <span className="text-white font-semibold text-sm">{t('out_of_stock', 'Out of Stock')}</span>
                 </div>
               )}
 
@@ -289,7 +294,7 @@ export default function RecentlyViewedProducts({
             onClick={() => router.push('/products')}
             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
           >
-            View All Products
+            {t('view_all_products', 'View All Products')}
           </button>
         </div>
       )}

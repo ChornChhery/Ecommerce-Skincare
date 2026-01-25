@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { I18nProvider } from '@/components/I18nProvider';
 
 interface AdminUser {
   id: string;
@@ -54,21 +55,25 @@ export default function AdminLayout({
     router.push('/admin/login');
   };
 
-  // Don't show layout on login page
+  // Show login page with i18n provider but without admin layout
   if (pathname === '/admin/login') {
-    return <>{children}</>;
+    return (
+      <I18nProvider>
+        {children}
+      </I18nProvider>
+    );
   }
 
   const navigation = [
     {
       name: 'Dashboard',
-      href: '/admin',
+      href: '/admin/dashboard',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
-      current: pathname === '/admin'
+      current: pathname === '/admin' || pathname === '/admin/dashboard'
     },
     {
       name: 'Products',
@@ -208,14 +213,15 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <I18nProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Mobile sidebar backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
@@ -348,5 +354,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
-  );
+  </I18nProvider>
+);
 }

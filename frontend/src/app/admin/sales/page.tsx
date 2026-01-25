@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { mockAdminApi, mockProducts, mockOrders } from '@/lib/mockApi';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { mockAdminApi, mockProducts } from '@/lib/mockApi';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -9,16 +10,12 @@ import {
   DollarSign, 
   ShoppingCart, 
   Star,
-  Calendar,
-  Filter,
   Download,
-  Eye,
   BarChart3,
   Target,
   Award,
   Zap,
-  RefreshCw,
-  Clock
+  RefreshCw
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
@@ -49,6 +46,7 @@ interface SalesMetrics {
 }
 
 export default function SalesAnalyticsPage() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('month');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -62,14 +60,23 @@ export default function SalesAnalyticsPage() {
     topCategory: '',
     conversionRate: 0
   });
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [categoryData, setCategoryData] = useState<any[]>([]);
+  interface ChartDataPoint {
+    name: string;
+    revenue: number;
+    units: number;
+    orders: number;
+  }
+  
+  interface CategoryDataPoint {
+    name: string;
+    value: number;
+    units: number;
+  }
+  
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryDataPoint[]>([]);
 
-  useEffect(() => {
-    fetchSalesData();
-  }, [timeFilter, categoryFilter]);
-
-  const fetchSalesData = async () => {
+  const fetchSalesData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -149,8 +156,14 @@ export default function SalesAnalyticsPage() {
       })));
 
       // Category breakdown based on your actual product categories
-      const categoryBreakdown = filteredData.reduce((acc: any, item) => {
-        const existing = acc.find((c: any) => c.name === item.category);
+      interface CategoryBreakdown {
+        name: string;
+        value: number;
+        units: number;
+      }
+      
+      const categoryBreakdown = filteredData.reduce((acc: CategoryBreakdown[], item) => {
+        const existing = acc.find((c: CategoryBreakdown) => c.name === item.category);
         if (existing) {
           existing.value += item.revenue;
           existing.units += item.unitsSold;
@@ -171,11 +184,27 @@ export default function SalesAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeFilter, categoryFilter, mockProducts]);
+
+  useEffect(() => {
+    fetchSalesData();
+  }, [fetchSalesData]);
+
+  interface CsvRow {
+    'Product Name': string;
+    'Category': string;
+    'Price': number;
+    'Units Sold': number;
+    'Revenue': number;
+    'Orders': number;
+    'Stock Level': number;
+    'Trend': string;
+    'Rating': string;
+  }
 
   const exportData = () => {
     // Create CSV data
-    const csvData = salesData.map(item => ({
+    const csvData: CsvRow[] = salesData.map((item: ProductSalesData) => ({
       'Product Name': item.name,
       'Category': item.category,
       'Price': item.price,
@@ -189,7 +218,7 @@ export default function SalesAnalyticsPage() {
 
     // Convert to CSV string
     const headers = Object.keys(csvData[0]).join(',');
-    const rows = csvData.map(row => Object.values(row).join(','));
+    const rows = csvData.map((row: CsvRow) => Object.values(row).join(','));
     const csvContent = [headers, ...rows].join('\n');
 
     // Download CSV
@@ -209,7 +238,7 @@ export default function SalesAnalyticsPage() {
     }).format(amount);
   };
 
-  const getTrendIcon = (trend: string, percentage: number) => {
+  const getTrendIcon = (trend: string) => {
     if (trend === 'up') return <TrendingUp className="w-4 h-4 text-green-500" />;
     if (trend === 'down') return <TrendingDown className="w-4 h-4 text-red-500" />;
     return <div className="w-4 h-4 bg-slate-300 rounded-full" />;
@@ -270,8 +299,8 @@ export default function SalesAnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Sales Analytics</h1>
-          <p className="text-slate-600 mt-1">Track your best-selling products and sales performance</p>
+          <h1 className="text-3xl font-bold text-slate-900">{t('admin.sales')}</h1>
+          <p className="text-slate-600 mt-1">{t('admin.analytics')}</p>
         </div>
         <div className="mt-4 sm:mt-0 flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -280,17 +309,17 @@ export default function SalesAnalyticsPage() {
               onChange={(e) => setTimeFilter(e.target.value)}
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="quarter">This Quarter</option>
-              <option value="year">This Year</option>
+              <option value="week">{t('common.thisWeek', 'This Week')}</option>
+              <option value="month">{t('common.thisMonth', 'This Month')}</option>
+              <option value="quarter">{t('common.thisQuarter', 'This Quarter')}</option>
+              <option value="year">{t('common.thisYear', 'This Year')}</option>
             </select>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t('common.all', 'All Categories')}</option>
               {categories.map(category => (
                 <option key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -310,7 +339,7 @@ export default function SalesAnalyticsPage() {
             className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
           >
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {t('admin.export')}
           </button>
         </div>
       </div>
@@ -329,7 +358,7 @@ export default function SalesAnalyticsPage() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(metrics.totalRevenue)}</p>
-            <p className="text-sm text-slate-600">Total Revenue</p>
+            <p className="text-sm text-slate-600">{t('admin.totalRevenue')}</p>
           </div>
         </div>
 
@@ -345,7 +374,7 @@ export default function SalesAnalyticsPage() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-900">{metrics.totalOrders.toLocaleString()}</p>
-            <p className="text-sm text-slate-600">Total Orders</p>
+            <p className="text-sm text-slate-600">{t('admin.totalOrders')}</p>
           </div>
         </div>
 
@@ -361,7 +390,7 @@ export default function SalesAnalyticsPage() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-900">{metrics.totalUnitsSold.toLocaleString()}</p>
-            <p className="text-sm text-slate-600">Units Sold</p>
+            <p className="text-sm text-slate-600">{t('admin.totalProducts')}</p>
           </div>
         </div>
 
@@ -377,7 +406,7 @@ export default function SalesAnalyticsPage() {
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(metrics.averageOrderValue)}</p>
-            <p className="text-sm text-slate-600">Avg Order Value</p>
+            <p className="text-sm text-slate-600">{t('admin.totalRevenue')}</p>
           </div>
         </div>
       </div>
@@ -387,7 +416,7 @@ export default function SalesAnalyticsPage() {
         {/* Revenue Chart */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Top Products by Revenue</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{t('admin.topProducts')}</h3>
             <BarChart3 className="w-5 h-5 text-slate-400" />
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -421,7 +450,7 @@ export default function SalesAnalyticsPage() {
         {/* Category Breakdown */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Sales by Category</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{t('admin.analytics')}</h3>
             <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded" />
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -467,8 +496,8 @@ export default function SalesAnalyticsPage() {
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Top Selling Products</h3>
-            <p className="text-sm text-slate-600">Best performing products {timeFilter === 'month' ? 'this month' : timeFilter === 'week' ? 'this week' : 'this period'}</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('admin.topProducts')}</h3>
+            <p className="text-sm text-slate-600">{t('admin.topProducts')} {timeFilter === 'month' ? t('common.thisMonth') : timeFilter === 'week' ? t('common.thisWeek') : t('common.thisPeriod', 'this period')}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -527,24 +556,24 @@ export default function SalesAnalyticsPage() {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Revenue</span>
+                    <span className="text-sm text-slate-600">{t('admin.totalRevenue')}</span>
                     <span className="font-semibold text-green-600">{formatCurrency(product.revenue)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Units Sold</span>
+                    <span className="text-sm text-slate-600">{t('admin.totalProducts')}</span>
                     <span className="font-semibold text-slate-900">{product.unitsSold.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Orders</span>
+                    <span className="text-sm text-slate-600">{t('admin.totalOrders')}</span>
                     <span className="font-semibold text-blue-600">{product.orders.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Trend</span>
+                    <span className="text-sm text-slate-600">{t('common.trend', 'Trend')}</span>
                     <div className="flex items-center space-x-1">
-                      {getTrendIcon(product.trend, product.trendPercentage)}
+                      {getTrendIcon(product.trend)}
                       <span className={`text-sm font-medium ${
                         product.trend === 'up' ? 'text-green-600' : 
                         product.trend === 'down' ? 'text-red-600' : 'text-slate-600'
@@ -557,7 +586,7 @@ export default function SalesAnalyticsPage() {
                   <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                      <span className="text-sm font-medium">{product.rating.toFixed(1)}</span>
+                      <span className="text-sm font-medium">{product.rating.toFixed(1)} {t('productPage.rating')}</span>
                       <span className="text-sm text-slate-500 ml-1">({product.reviews})</span>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded-full ${
@@ -565,7 +594,7 @@ export default function SalesAnalyticsPage() {
                       product.stockLevel < 50 ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
-                      {product.stockLevel} in stock
+                      {product.stockLevel} {t('admin.inventory')}
                     </span>
                   </div>
                 </div>
@@ -577,15 +606,15 @@ export default function SalesAnalyticsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Rank</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Product</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Category</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Revenue</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Units Sold</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Orders</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Trend</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Rating</th>
-                  <th className="text-left py-3 px-2 font-semibold text-slate-900">Stock</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('common.rank', 'Rank')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('common.product', 'Product')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('common.category', 'Category')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('admin.totalRevenue')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('admin.totalProducts')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('admin.totalOrders')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('common.trend', 'Trend')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('productPage.rating')}</th>
+                  <th className="text-left py-3 px-2 font-semibold text-slate-900">{t('admin.inventory')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -626,7 +655,7 @@ export default function SalesAnalyticsPage() {
                     </td>
                     <td className="py-4 px-2">
                       <div className="flex items-center space-x-1">
-                        {getTrendIcon(product.trend, product.trendPercentage)}
+                        {getTrendIcon(product.trend)}
                         <span className={`text-sm font-medium ${
                           product.trend === 'up' ? 'text-green-600' : 
                           product.trend === 'down' ? 'text-red-600' : 'text-slate-600'
@@ -668,8 +697,8 @@ export default function SalesAnalyticsPage() {
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Top Performers</h3>
-              <p className="text-sm text-slate-600">Products with highest growth</p>
+              <h3 className="text-lg font-semibold text-slate-900">{t('admin.topProducts')}</h3>
+              <p className="text-sm text-slate-600">{t('admin.topProducts')}</p>
             </div>
           </div>
           
@@ -707,8 +736,8 @@ export default function SalesAnalyticsPage() {
               <Package className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Low Stock Alert</h3>
-              <p className="text-sm text-slate-600">Top sellers running low</p>
+              <h3 className="text-lg font-semibold text-slate-900">{t('admin.inventory')}</h3>
+              <p className="text-sm text-slate-600">{t('admin.topProducts')}</p>
             </div>
           </div>
           
@@ -733,7 +762,7 @@ export default function SalesAnalyticsPage() {
                   <div className={`px-2 py-1 text-xs font-medium rounded-full ${
                     product.stockLevel < 20 ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
                   }`}>
-                    {product.stockLevel} left
+                    {product.stockLevel} {t('admin.inventory')}
                   </div>
                 </div>
               ))}
@@ -745,15 +774,15 @@ export default function SalesAnalyticsPage() {
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold mb-2">Ready to boost your sales?</h3>
-            <p className="text-blue-100">Analyze your data and take action to improve performance</p>
+            <h3 className="text-lg font-semibold mb-2">{t('admin.sales')}</h3>
+            <p className="text-blue-100">{t('admin.analytics')}</p>
           </div>
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
             <button className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium">
-              View Detailed Report
+              {t('admin.reports')}
             </button>
             <button className="px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium">
-              Create Marketing Campaign
+              {t('admin.analytics')}
             </button>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import { TranslatedText } from './TranslatedText';
+
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200">
@@ -14,17 +16,17 @@ export default function Footer() {
                 <h3 className="text-xl font-bold text-gray-900">
                   Skincare Store
                 </h3>
-                <p className="text-sm text-gray-600">Premium Collection</p>
+                <p className="text-sm text-gray-600"><TranslatedText translationKey="footer.storeInfo" defaultText="Premium Collection" /></p>
               </div>
             </div>
             <p className="text-gray-600 leading-relaxed mb-6 text-sm sm:text-base">
-              Discover our curated collection of premium skincare essentials, designed to help you achieve healthy, radiant skin with professional-grade products.
+              <TranslatedText translationKey="footer.description" defaultText="Discover our curated collection of premium skincare essentials, designed to help you achieve healthy, radiant skin with professional-grade products." />
             </p>
             
             {/* Newsletter Signup */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-gray-900">
-                Subscribe to our newsletter
+                <TranslatedText translationKey="footer.newsletter" defaultText="Subscribe to our newsletter" />
               </h4>
               <div className="flex flex-col sm:flex-row">
                 <input
@@ -36,7 +38,7 @@ export default function Footer() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  <span className="ml-2 sm:hidden">Subscribe</span>
+                  <span className="ml-2 sm:hidden"><TranslatedText translationKey="footer.subscribe" defaultText="Subscribe" /></span>
                 </button>
               </div>
             </div>
@@ -45,7 +47,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4 sm:mb-6">
-              Quick Links
+              <TranslatedText translationKey="footer.quickLinks" defaultText="Quick Links" />
             </h3>
             <ul className="space-y-2 sm:space-y-3">
               {[
@@ -71,7 +73,7 @@ export default function Footer() {
           {/* Customer Service */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4 sm:mb-6">
-              Customer Service
+              <TranslatedText translationKey="footer.customerService" defaultText="Customer Service" />
             </h3>
             <ul className="space-y-2 sm:space-y-3">
               {[
@@ -97,7 +99,7 @@ export default function Footer() {
           {/* Connect With Us */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4 sm:mb-6">
-              Connect With Us
+              <TranslatedText translationKey="footer.connectWithUs" defaultText="Connect With Us" />
             </h3>
             
             {/* Social Media Links */}
@@ -133,16 +135,16 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="space-y-3 sm:space-y-4">
               <div className="text-sm">
-                <div className="font-medium text-gray-900 mb-1">Email</div>
+                <div className="font-medium text-gray-900 mb-1"><TranslatedText translationKey="footer.contactEmail" defaultText="Email" /></div>
                 <div className="text-gray-600">support@skincare.com</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium text-gray-900 mb-1">Phone</div>
+                <div className="font-medium text-gray-900 mb-1"><TranslatedText translationKey="footer.contactPhone" defaultText="Phone" /></div>
                 <div className="text-gray-600">+1 (555) 123-4567</div>
               </div>
               <div className="text-sm">
-                <div className="font-medium text-gray-900 mb-1">Hours</div>
-                <div className="text-gray-600">Mon-Fri 9AM-6PM</div>
+                <div className="font-medium text-gray-900 mb-1"><TranslatedText translationKey="footer.businessHours" defaultText="Hours" /></div>
+                <div className="text-gray-600"><TranslatedText translationKey="footer.hours" defaultText="Mon-Fri 9AM-6PM" /></div>
               </div>
             </div>
           </div>
@@ -154,8 +156,8 @@ export default function Footer() {
             <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-6 text-gray-600">
               <span className="text-sm">&copy; 2024 Skincare Store. All rights reserved.</span>
               <div className="flex flex-wrap items-center space-x-4 sm:space-x-6">
-                <a href="#" className="text-sm hover:text-blue-600 transition-colors">Privacy Policy</a>
-                <a href="#" className="text-sm hover:text-blue-600 transition-colors">Terms of Service</a>
+                <a href="#" className="text-sm hover:text-blue-600 transition-colors"><TranslatedText translationKey="footer.privacyPolicy" defaultText="Privacy Policy" /></a>
+                <a href="#" className="text-sm hover:text-blue-600 transition-colors"><TranslatedText translationKey="footer.termsOfService" defaultText="Terms of Service" /></a>
                 <a href="#" className="text-sm hover:text-blue-600 transition-colors">Cookie Policy</a>
               </div>
             </div>

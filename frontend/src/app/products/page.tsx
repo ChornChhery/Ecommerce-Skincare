@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
 import ProductImageView from '@/components/ProductImageView';
+import { useTranslation } from 'react-i18next';
 
 interface Product {
   id: number;
@@ -28,6 +29,7 @@ interface Product {
 }
 
 export default function ProductPage() {
+  const { t } = useTranslation();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export default function ProductPage() {
       try {
         // Assuming mockApi has a getProduct method, if not we'll get it from getProducts
         const response = await mockApi.getProducts();
-        const foundProduct = response.data.find((p: any) => p.id === productId);
+        const foundProduct = response.data.find((p: { id: number }) => p.id === productId);
         
         if (foundProduct) {
           setProduct(foundProduct);
@@ -89,13 +91,13 @@ export default function ProductPage() {
 
   const getProductName = (product: Product) => {
     if (user?.language === 'th') return product.name_th || product.name_en;
-    if (user?.language === 'km') return product.name_kh || product.name_en;
+    if (user?.language === 'kh') return product.name_kh || product.name_en;
     return product.name_en;
   };
 
   const getProductDescription = (product: Product) => {
     if (user?.language === 'th') return product.description_th || product.description_en;
-    if (user?.language === 'km') return product.description_km || product.description_en;
+    if (user?.language === 'kh') return product.description_km || product.description_en;
     return product.description_en;
   };
 
@@ -120,7 +122,7 @@ export default function ProductPage() {
     }
     
     // Check if product already exists in cart
-    const existingItemIndex = cart.findIndex((item: any) => item.product_id === product.id);
+    const existingItemIndex = cart.findIndex((item: { product_id: number }) => item.product_id === product.id);
     
     if (existingItemIndex >= 0) {
       // Update quantity
@@ -201,7 +203,7 @@ export default function ProductPage() {
             <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-l-purple-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDelay: '0.3s' }}></div>
             <div className="mt-6 text-center">
               <div className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Loading Product Details...
+                {t('product.loadingDetails', 'Loading Product Details...')}
               </div>
             </div>
           </div>
@@ -218,12 +220,12 @@ export default function ProductPage() {
         <div className="flex flex-col justify-center items-center min-h-[80vh]">
           <div className="text-6xl mb-4">😔</div>
           <div className="text-2xl font-bold text-red-500 mb-2">{error}</div>
-          <div className="text-gray-500 mb-6">Product could not be found</div>
+          <div className="text-gray-500 mb-6">{t('product.notFound', 'Product could not be found')}</div>
           <button 
             onClick={() => router.push('/')}
             className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
-            Back to Products
+            {t('product.backToProducts', 'Back to Products')}
           </button>
         </div>
         <Footer />
@@ -256,7 +258,7 @@ export default function ProductPage() {
             onClick={() => router.push('/')}
             className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
-            Products
+            {t('nav.products', 'Products')}
           </button>
           <span className="text-slate-400">/</span>
           <span className="text-slate-600 capitalize">{product.category}</span>
@@ -349,7 +351,7 @@ export default function ProductPage() {
 
             {/* Description */}
             <div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">Description</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">{t('product.description', 'Description')}</h3>
               <p className="text-slate-600 leading-relaxed text-lg">
                 {getProductDescription(product)}
               </p>
@@ -357,33 +359,33 @@ export default function ProductPage() {
 
             {/* Key Benefits */}
             <div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">Key Benefits</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">{t('product.keyBenefits', 'Key Benefits')}</h3>
               <ul className="space-y-2">
                 <li className="flex items-center space-x-3">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  <span className="text-slate-600">Deeply moisturizes and nourishes skin</span>
+                  <span className="text-slate-600">{t('product.benefit1', 'Deeply moisturizes and nourishes skin')}</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  <span className="text-slate-600">Reduces signs of aging and fine lines</span>
+                  <span className="text-slate-600">{t('product.benefit2', 'Reduces signs of aging and fine lines')}</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                  <span className="text-slate-600">Suitable for daily use</span>
+                  <span className="text-slate-600">{t('product.benefit3', 'Suitable for daily use')}</span>
                 </li>
               </ul>
             </div>
 
             {/* Quantity Selector */}
             <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-3">Quantity</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">{t('product.quantity', 'Quantity')}</h3>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center border border-slate-200 rounded-xl">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-12 h-12 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-l-xl transition-colors"
                   >
-                    -
+                    {t('product.decrease', '-')}
                   </button>
                   <span className="w-16 h-12 flex items-center justify-center font-semibold">
                     {quantity}
@@ -392,10 +394,10 @@ export default function ProductPage() {
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-12 h-12 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-r-xl transition-colors"
                   >
-                    +
+                    {t('product.increase', '+')}
                   </button>
                 </div>
-                <span className="text-slate-500">In stock</span>
+                <span className="text-slate-500">{t('product.inStock', 'In stock')}</span>
               </div>
             </div>
 
@@ -405,13 +407,13 @@ export default function ProductPage() {
                 onClick={handleBuyNow}
                 className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-8 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300 hover:scale-[1.02] active:scale-95"
               >
-                Buy Now - ${(product.price * quantity).toFixed(2)}
+                {t('product.buyNow', 'Buy Now')} - ${(product.price * quantity).toFixed(2)}
               </button>
               <button
                 onClick={handleAddToCart}
                 className="flex-1 bg-white border-2 border-slate-200 text-slate-700 py-4 px-8 rounded-xl font-semibold text-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 hover:scale-[1.02] active:scale-95"
               >
-                Add to Cart
+                {t('product.addToCart', 'Add to Cart')}
               </button>
             </div>
 
@@ -422,8 +424,8 @@ export default function ProductPage() {
                   <span className="text-green-600">🚚</span>
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800">Free Shipping</p>
-                  <p className="text-sm text-slate-500">On orders over $50</p>
+                  <p className="font-semibold text-slate-800">{t('product.freeShipping', 'Free Shipping')}</p>
+                  <p className="text-sm text-slate-500">{t('product.onOrdersOver', 'On orders over $50')}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -431,8 +433,8 @@ export default function ProductPage() {
                   <span className="text-blue-600">↩️</span>
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800">Easy Returns</p>
-                  <p className="text-sm text-slate-500">30-day return policy</p>
+                  <p className="font-semibold text-slate-800">{t('product.easyReturns', 'Easy Returns')}</p>
+                  <p className="text-sm text-slate-500">{t('product.returnPolicy', '30-day return policy')}</p>
                 </div>
               </div>
             </div>

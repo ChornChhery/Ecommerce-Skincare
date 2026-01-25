@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { mockAdminApi, mockProducts } from '@/lib/mockApi';
 
 interface Product {
@@ -14,6 +15,7 @@ interface Product {
 }
 
 export default function InventoryPage() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -355,7 +357,11 @@ export default function InventoryPage() {
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
             <div className="text-sm text-slate-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} results
+              {t('common.pagination.showingResults', 'Showing {{start}} to {{end}} of {{total}} results', {
+                start: ((currentPage - 1) * itemsPerPage) + 1,
+                end: Math.min(currentPage * itemsPerPage, filteredProducts.length),
+                total: filteredProducts.length
+              }).replace('{{start}}', String(((currentPage - 1) * itemsPerPage) + 1)).replace('{{end}}', String(Math.min(currentPage * itemsPerPage, filteredProducts.length))).replace('{{total}}', String(filteredProducts.length))}
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -363,7 +369,7 @@ export default function InventoryPage() {
                 disabled={currentPage === 1}
                 className="px-3 py-1 border border-slate-300 rounded-md text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {t('common.pagination.previous', t('common.previous', 'Previous'))}
               </button>
               
               {[...Array(Math.min(totalPages, 5))].map((_, index) => {
@@ -398,7 +404,7 @@ export default function InventoryPage() {
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 border border-slate-300 rounded-md text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {t('common.pagination.next', t('common.next', 'Next'))}
               </button>
             </div>
           </div>

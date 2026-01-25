@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
-import { mockApi, mockProducts } from '@/lib/mockApi';
+import { mockProducts } from '@/lib/mockApi';
 
 interface CartItem {
   id: number;
@@ -22,6 +23,7 @@ interface CartItem {
 }
 
 export default function CartPage() {
+  const { t } = useTranslation();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
@@ -30,7 +32,7 @@ export default function CartPage() {
   const [discount, setDiscount] = useState(0);
   const [showPromoInput, setShowPromoInput] = useState(false);
   
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const toastActions = useToastActions();
   const router = useRouter();
 
@@ -213,7 +215,7 @@ export default function CartPage() {
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="mt-6 text-center">
               <div className="text-lg font-semibold text-gray-700">
-                Loading Your Cart...
+                {t('cart.loading', 'Loading Your Cart...')}
               </div>
             </div>
           </div>
@@ -237,11 +239,11 @@ export default function CartPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Shopping Cart
+              {t('cart.title', 'Shopping Cart')}
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Review your selected skincare products
+            {t('cart.reviewProducts', 'Review your selected skincare products')}
           </p>
         </div>
 
@@ -253,16 +255,16 @@ export default function CartPage() {
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Your cart is empty
+              {t('cart.empty', 'Your cart is empty')}
             </h3>
             <p className="text-gray-600 text-lg mb-8">
-              Add some amazing skincare products to get started!
+              {t('cart.emptyMsg', 'Add some amazing skincare products to get started!')}
             </p>
             <button
               onClick={handleContinueShopping}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Start Shopping
+              {t('cart.startShopping', 'Start Shopping')}
             </button>
           </div>
         ) : (
@@ -271,13 +273,13 @@ export default function CartPage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Cart Items ({cartItems.length})
+                  {t('cart.items', 'Cart Items')} ({cartItems.length})
                 </h2>
                 <button
                   onClick={handleContinueShopping}
                   className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
                 >
-                  ← Continue Shopping
+                  ← {t('cart.continueShopping', 'Continue Shopping')}
                 </button>
               </div>
 
@@ -300,7 +302,7 @@ export default function CartPage() {
                         {!item.in_stock && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                              Out of Stock
+                              {t('product.outOfStock', 'Out of Stock')}
                             </span>
                           </div>
                         )}
@@ -323,11 +325,11 @@ export default function CartPage() {
                               <span className={`text-sm font-medium ${
                                 item.in_stock ? 'text-green-600' : 'text-red-600'
                               }`}>
-                                {item.in_stock ? '✓ In Stock' : '✗ Out of Stock'}
+                                {item.in_stock ? t('product.inStock', '✓ In Stock') : '✗ ' + t('product.outOfStock', 'Out of Stock')}
                               </span>
                               {item.max_quantity && (
                                 <span className="text-sm text-slate-500">
-                                  Max: {item.max_quantity}
+                                  {t('cart.maxQuantity', 'Max:')} {item.max_quantity}
                                 </span>
                               )}
                             </div>
@@ -336,7 +338,7 @@ export default function CartPage() {
                             <div className="flex items-center justify-between">
                               {/* Quantity Controls */}
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-600">Qty:</span>
+                                <span className="text-sm font-medium text-gray-600">{t('cart.quantity', 'Qty:')}</span>
                                 <div className="flex items-center border border-gray-300 rounded-lg">
                                   <button
                                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -368,14 +370,14 @@ export default function CartPage() {
                                   onClick={() => handleViewProduct(item.product_id)}
                                   className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
                                 >
-                                  View Product
+                                  {t('cart.viewProduct', 'View Product')}
                                 </button>
                                 <button
                                   onClick={() => removeFromCart(item.id)}
                                   disabled={removingItems.has(item.id)}
                                   className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
                                 >
-                                  {removingItems.has(item.id) ? 'Removing...' : 'Remove'}
+                                  {removingItems.has(item.id) ? t('cart.removing', 'Removing...') : t('cart.remove', 'Remove')}
                                 </button>
                               </div>
                             </div>
@@ -401,17 +403,17 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sticky top-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('cart.orderSummary', 'Order Summary')}</h2>
                 
                 {/* Promo Code */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-gray-700">Promo Code</span>
+                    <span className="font-medium text-gray-700">{t('cart.promoCode', 'Promo Code')}</span>
                     <button
                       onClick={() => setShowPromoInput(!showPromoInput)}
                       className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      {showPromoInput ? 'Cancel' : 'Add Code'}
+                      {showPromoInput ? t('common.cancel', 'Cancel') : t('cart.addCode', 'Add Code')}
                     </button>
                   </div>
                   
@@ -421,21 +423,27 @@ export default function CartPage() {
                         type="text"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
-                        placeholder="Enter promo code"
+                        placeholder={t('cart.enterPromoCode', 'Enter promo code')}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <button
                         onClick={applyPromoCode}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                       >
-                        Apply
+                        {t('cart.apply', 'Apply')}
                       </button>
                     </div>
                   )}
                   
                   {discount > 0 && (
                     <div className="mt-2 text-sm text-green-600 font-medium">
-                      ✓ {discount}% discount applied
+                      ✓ {discount}% {t('cart.discountApplied', 'discount applied')}
+                    </div>
+                  )}
+                  
+                  {discount > 0 && (
+                    <div className="mt-2 text-sm text-green-600 font-medium">
+                      ✓ {discount}% {t('cart.discountApplied', 'discount applied')}
                     </div>
                   )}
                 </div>
@@ -443,30 +451,30 @@ export default function CartPage() {
                 {/* Summary Breakdown */}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-gray-600">
-                    <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                    <span>{t('cart.subtotal', 'Subtotal')} ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items', 'items')})</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>Discount ({discount}%)</span>
+                      <span>{t('cart.discount', 'Discount')} ({discount}%)</span>
                       <span>-${discountAmount.toFixed(2)}</span>
                     </div>
                   )}
                   
                   <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                    <span>{t('cart.shipping', 'Shipping')}</span>
+                    <span>{shipping === 0 ? t('cart.free', 'Free') : `$${shipping.toFixed(2)}`}</span>
                   </div>
                   
                   <div className="flex justify-between text-gray-600">
-                    <span>Tax</span>
+                    <span>{t('cart.tax', 'Tax')}</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
                   
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-gray-900">Total</span>
+                      <span className="text-xl font-bold text-gray-900">{t('cart.total', 'Total')}</span>
                       <span className="text-2xl font-bold text-blue-600">
                         ${total.toFixed(2)}
                       </span>
@@ -478,7 +486,7 @@ export default function CartPage() {
                 {subtotal < 50 && (
                   <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-700">
-                      Add ${(50 - subtotal).toFixed(2)} more for free shipping!
+                      {t('cart.addToFreeShipping', 'Add $')} {(50 - subtotal).toFixed(2)} {t('cart.moreForFreeShipping', ' more for free shipping!')}
                     </p>
                   </div>
                 )}
@@ -490,8 +498,8 @@ export default function CartPage() {
                   className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {cartItems.some(item => !item.in_stock) 
-                    ? 'Remove Out of Stock Items to Checkout'
-                    : `Proceed to Checkout`
+                    ? t('cart.removeItemToCheckout', 'Remove Out of Stock Items to Checkout')
+                    : t('cart.proceedToCheckout', 'Proceed to Checkout')
                   }
                 </button>
 
@@ -500,7 +508,7 @@ export default function CartPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  <span>Secure checkout guaranteed</span>
+                  <span>{t('cart.secureCheckout', 'Secure checkout guaranteed')}</span>
                 </div>
               </div>
             </div>

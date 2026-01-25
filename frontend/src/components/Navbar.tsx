@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+import { TranslatedText } from './TranslatedText';
 
 interface CartItem {
   product_id: number;
@@ -15,12 +18,20 @@ interface Order {
   status: string;
 }
 
+interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [ordersCount, setOrdersCount] = useState(0);
@@ -32,7 +43,7 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (_event: MouseEvent) => {
       if (isProfileOpen) {
         setIsProfileOpen(false);
       }
@@ -54,7 +65,7 @@ export default function Navbar() {
       try {
         setAdminUser(JSON.parse(adminData));
         setIsAdminLoggedIn(true);
-      } catch (error) {
+      } catch (_error) {
         setIsAdminLoggedIn(false);
         setAdminUser(null);
       }
@@ -83,7 +94,7 @@ export default function Navbar() {
         const cart: CartItem[] = JSON.parse(cartData);
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         setCartCount(totalItems);
-      } catch (error) {
+      } catch (_error) {
         setCartCount(0);
       }
     } else {
@@ -96,7 +107,7 @@ export default function Navbar() {
       try {
         const wishlist = JSON.parse(wishlistData);
         setWishlistCount(Array.isArray(wishlist) ? wishlist.length : 0);
-      } catch (error) {
+      } catch (_error) {
         setWishlistCount(0);
       }
     } else {
@@ -109,7 +120,7 @@ export default function Navbar() {
       try {
         const orders: Order[] = JSON.parse(ordersData);
         setOrdersCount(orders.length);
-      } catch (error) {
+      } catch (_error) {
         setOrdersCount(0);
       }
     } else {
@@ -267,7 +278,7 @@ export default function Navbar() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
-                            <span className="text-sm">Sign Out</span>
+                            <span className="text-sm"><TranslatedText translationKey="nav.logout" defaultText="Logout" /></span>
                           </button>
                         </div>
                       </div>
@@ -319,7 +330,7 @@ export default function Navbar() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <span>Admin</span>
+              <span><TranslatedText translationKey="nav.admin" defaultText="Admin" /></span>
             </Link>
 
             {isAuthenticated ? (
@@ -408,7 +419,7 @@ export default function Navbar() {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span className="text-sm">Profile</span>
+                          <span className="text-sm"><TranslatedText translationKey="nav.profile" defaultText="Profile" /></span>
                         </Link>
                         
                         <Link 
@@ -420,7 +431,7 @@ export default function Navbar() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
-                            <span className="text-sm">Orders</span>
+                            <span className="text-sm"><TranslatedText translationKey="nav.orders" defaultText="Orders" /></span>
                           </div>
                           {ordersCount > 0 && (
                             <span className="bg-blue-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -438,7 +449,7 @@ export default function Navbar() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span className="text-sm">Cart</span>
+                            <span className="text-sm"><TranslatedText translationKey="nav.cart" defaultText="Cart" /></span>
                           </div>
                           {cartCount > 0 && (
                             <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -456,7 +467,7 @@ export default function Navbar() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
-                            <span className="text-sm">Wishlist</span>
+                            <span className="text-sm"><TranslatedText translationKey="nav.wishlist" defaultText="Wishlist" /></span>
                           </div>
                           {wishlistCount > 0 && (
                             <span className="bg-pink-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -491,7 +502,7 @@ export default function Navbar() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  <span>Sign In</span>
+                  <span><TranslatedText translationKey="nav.login" defaultText="Login" /></span>
                 </Link>
                 
                 {/* Register Button */}
@@ -499,10 +510,15 @@ export default function Navbar() {
                   href="/register"
                   className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Register
+                  <TranslatedText translationKey="nav.register" defaultText="Register" />
                 </Link>
               </>
             )}
+
+            {/* Language Switcher */}
+            <div className="border-l border-gray-200 pl-8">
+              <LanguageSwitcher />
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -551,7 +567,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Profile
+                    {t('nav.profile', 'Profile')}
                   </Link>
                   
                   <Link
@@ -563,7 +579,7 @@ export default function Navbar() {
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
-                      Orders
+                      {t('nav.orders', 'Orders')}
                     </div>
                     {ordersCount > 0 && (
                       <span className="bg-blue-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -581,7 +597,7 @@ export default function Navbar() {
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
-                      Cart
+                      {t('nav.cart', 'Cart')}
                     </div>
                     {cartCount > 0 && (
                       <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -599,7 +615,7 @@ export default function Navbar() {
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
-                      Wishlist
+                      {t('nav.wishlist', 'Wishlist')}
                     </div>
                     {wishlistCount > 0 && (
                       <span className="bg-pink-500 text-white text-xs font-bold rounded-full px-2 py-1 min-w-[1.25rem] text-center">
@@ -616,7 +632,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    Admin
+                    {t('nav.admin', 'Admin')}
                   </Link>
                   
                   <div className="border-t border-gray-100 mt-2 pt-2">
@@ -627,7 +643,7 @@ export default function Navbar() {
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
-                      Sign Out
+                      {t('nav.logout', 'Sign Out')}
                     </button>
                   </div>
                 </>
@@ -641,7 +657,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Sign In
+                    {t('nav.login', 'Sign In')}
                   </Link>
                   
                   <Link
@@ -652,7 +668,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    Register
+                    {t('nav.register', 'Register')}
                   </Link>
                   
                   <Link
@@ -663,8 +679,16 @@ export default function Navbar() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    Admin
+                    {t('nav.admin', 'Admin')}
                   </Link>
+
+                  {/* Language Switcher Mobile */}
+                  <div className="border-t border-gray-100 mt-2 pt-2">
+                    <div className="px-3 py-2">
+                      <p className="text-xs text-gray-500 font-semibold mb-2">{t('common.language', 'Language')}</p>
+                      <LanguageSwitcher />
+                    </div>
+                  </div>
                 </>
               )}
             </div>

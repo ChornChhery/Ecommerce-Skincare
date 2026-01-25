@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { mockApi, mockReviews } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -42,11 +44,6 @@ interface Review {
   created_at: string;
 }
 
-interface CartItem {
-  product_id: number;
-  quantity: number;
-}
-
 export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -59,8 +56,8 @@ export default function ProductPage() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [cart, setCart] = useState<CartItem[]>([]);
   
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const toastActions = useToastActions();
   const params = useParams();
@@ -128,21 +125,19 @@ export default function ProductPage() {
           setReviews(productReviews);
 
           const savedFavorites = localStorage.getItem('favorites');
-          const savedCart = localStorage.getItem('cart');
           
           if (savedFavorites) {
             const favoritesArray = JSON.parse(savedFavorites);
             setFavorites(new Set(favoritesArray));
             setIsFavorite(favoritesArray.includes(productId));
           }
-          if (savedCart) setCart(JSON.parse(savedCart));
 
           // Add to recently viewed
           addToRecentlyViewed(enhancedProduct);
         } else {
           setError('Product not found');
         }
-      } catch (error) {
+      } catch {
         setError('Failed to load product');
       } finally {
         setLoading(false);
@@ -154,13 +149,13 @@ export default function ProductPage() {
 
   const getProductName = (product: Product) => {
     if (user?.language === 'th' && product.name_th) return product.name_th;
-    if (user?.language === 'km' && product.name_kh) return product.name_kh;
+    if (user?.language === 'kh' && product.name_kh) return product.name_kh;
     return product.name_en;
   };
 
   const getProductDescription = (product: Product) => {
     if (user?.language === 'th' && product.description_th) return product.description_th;
-    if (user?.language === 'km' && product.description_km) return product.description_km;
+    if (user?.language === 'kh' && product.description_km) return product.description_km;
     return product.description_en;
   };
 
@@ -183,23 +178,22 @@ export default function ProductPage() {
       await new Promise(resolve => setTimeout(resolve, 800));
     }
     
-    setCart(prev => {
-      const existingItem = prev.find(item => item.product_id === targetProductId);
-      let updated;
-      
-      if (existingItem) {
-        updated = prev.map(item =>
-          item.product_id === targetProductId
-            ? { ...item, quantity: item.quantity + (productToAdd ? quantityToAdd : quantity) }
-            : item
-        );
-      } else {
-        updated = [...prev, { product_id: targetProductId!, quantity: productToAdd ? quantityToAdd : quantity }];
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(updated));
-      return updated;
-    });
+    const savedCart = localStorage.getItem('cart') || '[]';
+    const prev = JSON.parse(savedCart);
+    const existingItem = prev.find((item: { product_id: number; quantity: number }) => item.product_id === targetProductId);
+    let updated;
+    
+    if (existingItem) {
+      updated = prev.map((item: { product_id: number; quantity: number }) =>
+        item.product_id === targetProductId
+          ? { ...item, quantity: item.quantity + (productToAdd ? quantityToAdd : quantity) }
+          : item
+      );
+    } else {
+      updated = [...prev, { product_id: targetProductId!, quantity: productToAdd ? quantityToAdd : quantity }];
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(updated));
     
     // Trigger custom event to update navbar counter after state update
     setTimeout(() => {
@@ -341,7 +335,7 @@ export default function ProductPage() {
           <div className="text-center max-w-md">
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{error}</h2>
-            <p className="text-gray-600 mb-6">The product you're looking for could not be found.</p>
+            <p className="text-gray-600 mb-6">The product you&apos;re looking for could not be found.</p>
             <button 
               onClick={() => router.push('/')}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
@@ -376,7 +370,22 @@ export default function ProductPage() {
             Home
           </button>
           <span className="text-gray-400">→</span>
-          <span className="text-gray-600 capitalize">{product.category}</span>
+          <span className="text-gray-600 capitalize">{
+            product.category === 'skincare' ? t('product.skinCare', 'Skincare') :
+            product.category === 'cleanser' ? t('product.cleanser', 'Cleanser') :
+            product.category === 'moisturizer' ? t('product.moisturizer', 'Moisturizer') :
+            product.category === 'serum' ? t('product.serum', 'Serum') :
+            product.category === 'sunscreen' ? t('product.sunscreen', 'Sunscreen') :
+            product.category === 'toner' ? t('product.toner', 'Toner') :
+            product.category === 'mask' ? t('product.mask', 'Mask') :
+            product.category === 'exfoliator' ? t('product.exfoliator', 'Exfoliator') :
+            product.category === 'essence' ? t('product.essence', 'Essence') :
+            product.category === 'eye cream' ? t('product.eye_cream', 'Eye Cream') :
+            product.category === 'oil' ? t('product.oil', 'Oil') :
+            product.category === 'treatment' ? t('product.treatment', 'Treatment') :
+            product.category === 'medicine' ? t('product.medicine', 'Medicine') :
+            product.category
+          }</span>
           <span className="text-gray-400">→</span>
           <span className="text-gray-800 font-medium truncate max-w-xs">{getProductName(product)}</span>
         </nav>
@@ -393,7 +402,7 @@ export default function ProductPage() {
             {/* Overlays for sale and out of stock */}
             {!product.in_stock && (
               <div className="absolute top-4 left-4 right-4 z-20 bg-gray-900/90 text-white text-center py-2 rounded-lg font-medium text-sm">
-                Out of Stock
+                {t('product.unavailable', 'Out of Stock')}
               </div>
             )}
 
@@ -407,7 +416,22 @@ export default function ProductPage() {
             <div className="absolute bottom-20 left-4 z-20">
               <span className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium bg-gray-900/80 text-white rounded-lg backdrop-blur-sm capitalize">
                 <span>{categoryConfig[product.category.toLowerCase()]?.icon || '🧴'}</span>
-                <span>{product.category}</span>
+                <span>{
+                  product.category === 'skincare' ? t('product.skinCare', 'Skincare') :
+                  product.category === 'cleanser' ? t('product.cleanser', 'Cleanser') :
+                  product.category === 'moisturizer' ? t('product.moisturizer', 'Moisturizer') :
+                  product.category === 'serum' ? t('product.serum', 'Serum') :
+                  product.category === 'sunscreen' ? t('product.sunscreen', 'Sunscreen') :
+                  product.category === 'toner' ? t('product.toner', 'Toner') :
+                  product.category === 'mask' ? t('product.mask', 'Mask') :
+                  product.category === 'exfoliator' ? t('product.exfoliator', 'Exfoliator') :
+                  product.category === 'essence' ? t('product.essence', 'Essence') :
+                  product.category === 'eye cream' ? t('product.eye_cream', 'Eye Cream') :
+                  product.category === 'oil' ? t('product.oil', 'Oil') :
+                  product.category === 'treatment' ? t('product.treatment', 'Treatment') :
+                  product.category === 'medicine' ? t('product.medicine', 'Medicine') :
+                  product.category
+                }</span>
               </span>
             </div>
 
@@ -469,8 +493,8 @@ export default function ProductPage() {
                       (product.stock_count || 0) <= 5 ? 'text-orange-600' : 'text-green-600'
                     }`}>
                       {(product.stock_count || 0) <= 5 
-                        ? `Only ${product.stock_count} left in stock!`
-                        : `In Stock (${product.stock_count} available)`
+                        ? t('product.onlyLeftInStock', 'Only {{count}} left in stock!', { count: product.stock_count })
+                        : t('product.inStockAvailable', 'In Stock ({{count}} available)', { count: product.stock_count })
                       }
                     </span>
                   </div>
@@ -489,8 +513,8 @@ export default function ProductPage() {
                   <span className="text-lg">✨</span>
                   <span className="font-semibold text-gray-700">
                     {product.skin_type === 'all' || product.skin_type === user.skin_type 
-                      ? `Perfect for your ${user.skin_type} skin type!`
-                      : `Recommended for ${product.skin_type} skin (you have ${user.skin_type})`
+                      ? t('product.perfectForSkinType', 'Perfect for your {{skinType}} skin type!', { skinType: user.skin_type })
+                      : t('product.recommendedForSkinType', 'Recommended for {{recommendedSkinType}} skin (you have {{userSkinType}})', { recommendedSkinType: product.skin_type, userSkinType: user.skin_type })
                     }
                   </span>
                 </div>
@@ -498,14 +522,14 @@ export default function ProductPage() {
             )}
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Description</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('product.description', 'Description')}</h3>
               <p className="text-gray-600 leading-relaxed">
                 {getProductDescription(product)}
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('product.quantity', 'Quantity')}</h3>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center bg-white border border-gray-300 rounded-lg">
                   <button
@@ -539,14 +563,14 @@ export default function ProductPage() {
                 disabled={!product.in_stock}
                 className="flex-1 bg-blue-600 text-white py-4 px-8 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {product.in_stock ? `Buy Now - $${(product.price * quantity).toFixed(2)}` : 'Out of Stock'}
+                {product.in_stock ? `${t('product.buyNow', 'Buy Now')} - $${(product.price * quantity).toFixed(2)}` : t('product.unavailable', 'Out of Stock')}
               </button>
               <button
                 onClick={() => handleAddToCart()}
                 disabled={isAddingToCart || !product.in_stock}
                 className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-4 px-8 rounded-lg font-semibold text-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+                {isAddingToCart ? t('product.adding', 'Adding...') : t('product.addToCart', 'Add to Cart')}
               </button>
             </div>
           </div>
@@ -556,13 +580,13 @@ export default function ProductPage() {
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              Customer Reviews
+              {t('product.reviews', 'Customer Reviews')}
             </h2>
             <button
               onClick={() => setShowReviewForm(!showReviewForm)}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Write a Review
+              {t('product.writeReview', 'Write a Review')}
             </button>
           </div>
 
@@ -570,18 +594,18 @@ export default function ProductPage() {
             <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <form onSubmit={handleSubmitReview}>
                 <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-3">Rating</label>
+                  <label className="block text-gray-700 font-medium mb-3">{t('product.rating', 'Rating')}</label>
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {renderInteractiveStars()}
                     </div>
                     <span className="ml-4 text-gray-600 font-medium">
-                      {newReview.rating} star{newReview.rating !== 1 ? 's' : ''}
+                      {t('product.stars', '{{rating}} star{{count, plural, one {} other {s}}}', { rating: newReview.rating, count: newReview.rating })}
                     </span>
                   </div>
                 </div>
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-medium mb-3">Comment</label>
+                  <label className="block text-gray-700 font-medium mb-3">{t('product.comment', 'Comment')}</label>
                   <textarea
                     value={newReview.comment}
                     onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
@@ -595,7 +619,7 @@ export default function ProductPage() {
                     type="submit"
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
-                    Submit Review
+                    {t('product.submitReview', 'Submit Review')}
                   </button>
                   <button
                     type="button"
@@ -605,7 +629,7 @@ export default function ProductPage() {
                     }}
                     className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                   >
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </button>
                 </div>
               </form>
@@ -616,8 +640,8 @@ export default function ProductPage() {
             {reviews.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
                 <div className="text-5xl mb-4">💬</div>
-                <p className="text-xl font-semibold text-gray-600 mb-2">No reviews yet</p>
-                <p className="text-gray-500">Be the first to review this product!</p>
+                <p className="text-xl font-semibold text-gray-600 mb-2">{t('product.noReviews', 'No reviews yet')}</p>
+                <p className="text-gray-500">{t('product.beFirstToReview', 'Be the first to review this product!')}</p>
               </div>
             ) : (
               reviews.map((review) => (
@@ -632,7 +656,7 @@ export default function ProductPage() {
                     </div>
                     {review.status === 'pending' && (
                       <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                        Pending Review
+                        {t('product.pendingReview', 'Pending Review')}
                       </span>
                     )}
                   </div>
@@ -647,7 +671,7 @@ export default function ProductPage() {
         {relatedProducts.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              Related Products
+              {t('product.relatedProducts', 'Related Products')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
@@ -658,15 +682,16 @@ export default function ProductPage() {
                 >
                   {!relatedProduct.in_stock && (
                     <div className="absolute top-4 left-4 right-4 z-10 bg-gray-900/90 text-white text-center py-2 rounded-lg font-medium text-sm">
-                      Out of Stock
+                      {t('product.unavailable', 'Out of Stock')}
                     </div>
                   )}
 
                   <div className="relative aspect-[4/5] overflow-hidden">
-                    <img
+                    <Image
                       src={relatedProduct.image_url}
                       alt={getProductName(relatedProduct)}
-                      className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                      fill
+                      className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
                         !relatedProduct.in_stock ? 'grayscale opacity-60' : ''
                       }`}
                     />
@@ -692,6 +717,7 @@ export default function ProductPage() {
                         }}
                         className="w-9 h-9 rounded-full bg-white/90 text-gray-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all shadow-lg"
                       >
+                        <div className="sr-only">{t('common.view', 'View')}</div>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -770,7 +796,7 @@ export default function ProductPage() {
                         disabled={!relatedProduct.in_stock}
                         className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                       >
-                        {relatedProduct.in_stock ? 'Buy Now' : 'Unavailable'}
+                        {relatedProduct.in_stock ? t('product.buyNow', 'Buy Now') : t('product.unavailable', 'Unavailable')}
                       </button>
                       <button
                         onClick={(e) => {

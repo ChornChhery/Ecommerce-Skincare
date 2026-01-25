@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface OrderItem {
   id: number;
@@ -29,13 +30,14 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showSuccess, showError } = useToastActions();
@@ -186,7 +188,7 @@ export default function OrdersPage() {
       
       // Merge with existing cart (avoiding duplicates by updating quantities)
       cartItems.forEach(newItem => {
-        const existingIndex = existingCart.findIndex((item: any) => item.product_id === newItem.product_id);
+        const existingIndex = existingCart.findIndex((item: { product_id: number }) => item.product_id === newItem.product_id);
         if (existingIndex >= 0) {
           existingCart[existingIndex].quantity += newItem.quantity;
         } else {
@@ -221,7 +223,7 @@ export default function OrdersPage() {
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="mt-6 text-center">
               <div className="text-lg font-semibold text-gray-700">
-                Loading Your Orders...
+                {t('ordersPage.loading', 'Loading Your Orders...')}
               </div>
             </div>
           </div>
@@ -270,11 +272,11 @@ export default function OrdersPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              My Orders
+              {t('ordersPage.title', 'My Orders')}
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Track and manage your skincare purchases
+            {t('ordersPage.description', 'Track and manage your skincare purchases')}
           </p>
         </div>
 
@@ -290,7 +292,7 @@ export default function OrdersPage() {
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
               }`}
             >
-              {status === 'all' ? 'All Orders' : status}
+              {status === 'all' ? t('ordersPage.allOrders', 'All Orders') : t(`ordersPage.${status}`, status)}
               {status !== 'all' && (
                 <span className="ml-2 px-2 py-1 text-xs bg-white/20 rounded-full">
                   {orders.filter(order => order.status === status).length}
@@ -309,18 +311,18 @@ export default function OrdersPage() {
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              {filterStatus === 'all' ? 'No orders yet' : `No ${filterStatus} orders`}
+              {filterStatus === 'all' ? t('ordersPage.noOrders', 'No orders yet') : t('ordersPage.noFilteredOrders', `No ${filterStatus} orders`)}
             </h3>
             <p className="text-gray-600 text-lg mb-8">
               {filterStatus === 'all' 
-                ? 'Start shopping to see your orders here!' 
-                : `You don't have any ${filterStatus} orders.`}
+                ? t('ordersPage.startShopping', 'Start shopping to see your orders here!') 
+                : t('ordersPage.noFilteredOrdersText', `You don't have any ${filterStatus} orders.`)}
             </p>
             <button
               onClick={() => router.push('/')}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Start Shopping
+              {t('ordersPage.startShoppingButton', 'Start Shopping')}
             </button>
           </div>
         ) : (
@@ -337,10 +339,10 @@ export default function OrdersPage() {
                       <div className="text-2xl">{getStatusIcon(order.status)}</div>
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">
-                          Order #{order.order_number}
+                          {t('ordersPage.orderId', 'Order #')}{order.order_number}
                         </h3>
                         <p className="text-gray-500">
-                          Placed on {new Date(order.date).toLocaleDateString('en-US', {
+                          {t('ordersPage.placedOn', 'Placed on')} {new Date(order.date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
@@ -358,7 +360,7 @@ export default function OrdersPage() {
                           ${order.total.toFixed(2)}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                          {order.items.length} {order.items.length > 1 ? t('ordersPage.items', 'items') : t('ordersPage.item', 'item')}
                         </div>
                       </div>
                     </div>
@@ -398,7 +400,7 @@ export default function OrdersPage() {
                           onClick={() => handleViewProduct(item.product_id)}
                           className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200"
                         >
-                          View Product
+                          {t('ordersPage.viewProduct', 'View Product')}
                         </button>
                       </div>
                     ))}
@@ -407,8 +409,8 @@ export default function OrdersPage() {
                   {/* Order Actions */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200">
                     <div className="text-sm text-gray-600">
-                      <div><span className="font-medium">Shipping:</span> {order.shipping_address}</div>
-                      <div><span className="font-medium">Payment:</span> {order.payment_method}</div>
+                      <div><span className="font-medium">{t('checkout.shippingAddress', 'Shipping')}:</span> {order.shipping_address}</div>
+                      <div><span className="font-medium">{t('checkout.paymentMethod', 'Payment')}:</span> {order.payment_method}</div>
                     </div>
                     
                     <div className="flex space-x-3">
@@ -417,7 +419,7 @@ export default function OrdersPage() {
                           onClick={() => handleReorder(order)}
                           className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                         >
-                          Reorder
+                          {t('ordersPage.reorder', 'Reorder')}
                         </button>
                       )}
                       
@@ -425,7 +427,7 @@ export default function OrdersPage() {
                         onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)}
                         className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
                       >
-                        {selectedOrder?.id === order.id ? 'Hide Details' : 'View Details'}
+                        {selectedOrder?.id === order.id ? t('ordersPage.hideDetails', 'Hide Details') : t('ordersPage.viewDetails', 'View Details')}
                       </button>
                     </div>
                   </div>
@@ -435,7 +437,7 @@ export default function OrdersPage() {
                     <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h5 className="font-semibold text-gray-900 mb-3">Order Timeline</h5>
+                          <h5 className="font-semibold text-gray-900 mb-3">{t('ordersPage.orderTimeline', 'Order Timeline')}</h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex items-center space-x-2">
                               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -469,22 +471,22 @@ export default function OrdersPage() {
                         </div>
                         
                         <div>
-                          <h5 className="font-semibold text-gray-900 mb-3">Order Summary</h5>
+                          <h5 className="font-semibold text-gray-900 mb-3">{t('checkout.orderSummary', 'Order Summary')}</h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Subtotal:</span>
+                              <span className="text-gray-600">{t('cart.subtotal', 'Subtotal')}:</span>
                               <span className="font-medium">${(order.total * 0.9).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Shipping:</span>
+                              <span className="text-gray-600">{t('checkout.shippingAddress', 'Shipping')}:</span>
                               <span className="font-medium">Free</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Tax:</span>
+                              <span className="text-gray-600">{t('cart.tax', 'Tax')}:</span>
                               <span className="font-medium">${(order.total * 0.1).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
-                              <span>Total:</span>
+                              <span>{t('cart.total', 'Total')}:</span>
                               <span>${order.total.toFixed(2)}</span>
                             </div>
                           </div>

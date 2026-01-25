@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Filter, Eye, Check, X, Star, MessageSquare, User, Calendar, Flag, Clock } from 'lucide-react';
 import { mockAdminApi } from '@/lib/mockApi';
 
@@ -17,6 +18,7 @@ interface Review {
 }
 
 export default function ReviewsPage() {
+  const { t } = useTranslation('common');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -173,12 +175,12 @@ export default function ReviewsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Review Moderation</h1>
-          <p className="text-gray-600">Manage and moderate customer product reviews</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.reviews')}</h1>
+          <p className="text-gray-600">{t('admin.reviews')}</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500">
-            {filteredReviews.length} reviews
+            {filteredReviews.length} {t('admin.reviews')}
           </span>
         </div>
       </div>
@@ -191,7 +193,7 @@ export default function ReviewsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search reviews by product, customer, or content..."
+                placeholder={`${t('admin.search')} ${t('admin.reviews')} ${t('common.by', 'by')} ${t('common.product', 'product')}, ${t('common.customer', 'customer')}, ${t('common.or', 'or')} ${t('common.content', 'content')}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -206,11 +208,11 @@ export default function ReviewsPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-                <option value="flagged">Flagged</option>
+                <option value="all">{t('common.all', 'All Status')}</option>
+                <option value="pending">{t('admin.status.pending')}</option>
+                <option value="approved">{t('admin.status.approved')}</option>
+                <option value="rejected">{t('admin.status.rejected')}</option>
+                <option value="flagged">{t('admin.status.flagged')}</option>
               </select>
             </div>
             <select
@@ -218,12 +220,12 @@ export default function ReviewsPage() {
               onChange={(e) => setRatingFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Ratings</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
+              <option value="all">{t('common.all', 'All Ratings')}</option>
+              <option value="5">5 {t('productPage.rating')}</option>
+              <option value="4">4 {t('productPage.rating')}</option>
+              <option value="3">3 {t('productPage.rating')}</option>
+              <option value="2">2 {t('productPage.rating')}</option>
+              <option value="1">1 {t('productPage.rating')}</option>
             </select>
           </div>
         </div>
@@ -234,26 +236,26 @@ export default function ReviewsPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-blue-700">
-              {selectedReviews.length} review{selectedReviews.length > 1 ? 's' : ''} selected
+              {selectedReviews.length} {t('admin.reviews')}{selectedReviews.length > 1 ? 's' : ''} {t('common.selected', 'selected')}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleBulkAction('approve')}
                 className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
               >
-                Approve All
+                {t('common.approve', 'Approve All')}
               </button>
               <button
                 onClick={() => handleBulkAction('reject')}
                 className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
               >
-                Reject All
+                {t('common.reject', 'Reject All')}
               </button>
               <button
                 onClick={() => setSelectedReviews([])}
                 className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
               >
-                Clear Selection
+                {t('common.clear', 'Clear Selection')}
               </button>
             </div>
           </div>
@@ -274,10 +276,10 @@ export default function ReviewsPage() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">Review #{review.id}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{t('admin.reviews')} #{review.id}</h3>
                     {renderStars(review.rating)}
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(review.status)}`}>
-                      {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
+                      {t(`admin.status.${review.status}`, review.status.charAt(0).toUpperCase() + review.status.slice(1))}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
@@ -291,7 +293,7 @@ export default function ReviewsPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {new Date(review.created_at).toLocaleDateString()}
+                      {new Date(review.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </div>
                   </div>
                   <p className="text-gray-700 mb-3">{review.comment}</p>
@@ -342,11 +344,11 @@ export default function ReviewsPage() {
       {filteredReviews.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No reviews found</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('common.noResults', 'No reviews found')}</h3>
           <p className="mt-1 text-sm text-gray-500">
             {searchTerm || statusFilter !== 'all' || ratingFilter !== 'all'
-              ? 'Try adjusting your search or filter criteria.'
-              : 'Reviews will appear here when customers leave feedback.'
+              ? t('common.adjustFilters', 'Try adjusting your search or filter criteria.')
+              : t('common.noData', 'Reviews will appear here when customers leave feedback.')
             }
           </p>
         </div>
@@ -356,7 +358,7 @@ export default function ReviewsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
           <div className="text-sm text-gray-500">
-            Page {currentPage} of {totalPages}
+            {t('common.page', 'Page')} {currentPage} {t('common.of', 'of')} {totalPages}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -364,14 +366,14 @@ export default function ReviewsPage() {
               disabled={currentPage === 1}
               className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Previous
+              {t('common.pagination.previous', t('common.previous', 'Previous'))}
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              {t('common.pagination.next', t('common.next', 'Next'))}
             </button>
           </div>
         </div>
@@ -383,7 +385,7 @@ export default function ReviewsPage() {
           <div className="flex items-center">
             <MessageSquare className="w-8 h-8 text-blue-500" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Total Reviews</p>
+              <p className="text-sm font-medium text-gray-500">{t('admin.reviews')}</p>
               <p className="text-lg font-semibold text-gray-900">
                 {reviews.length}
               </p>
@@ -394,7 +396,7 @@ export default function ReviewsPage() {
           <div className="flex items-center">
             <Clock className="w-8 h-8 text-yellow-500" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Pending</p>
+              <p className="text-sm font-medium text-gray-500">{t('admin.status.pending')}</p>
               <p className="text-lg font-semibold text-gray-900">
                 {reviews.filter(r => r.status === 'pending').length}
               </p>
@@ -405,7 +407,7 @@ export default function ReviewsPage() {
           <div className="flex items-center">
             <Flag className="w-8 h-8 text-red-500" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Flagged</p>
+              <p className="text-sm font-medium text-gray-500">{t('admin.status.flagged')}</p>
               <p className="text-lg font-semibold text-gray-900">
                 {reviews.filter(r => r.status === 'flagged').length}
               </p>
@@ -416,7 +418,7 @@ export default function ReviewsPage() {
           <div className="flex items-center">
             <Star className="w-8 h-8 text-yellow-400" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Avg Rating</p>
+              <p className="text-sm font-medium text-gray-500">{t('productPage.rating')}</p>
               <p className="text-lg font-semibold text-gray-900">
                 {reviews.length > 0 
                   ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)

@@ -3,6 +3,18 @@
 import { useState, useEffect } from 'react';
 import { mockAdminApi, mockProducts } from '@/lib/mockApi';
 import { Search, Plus, Edit, Trash2, Tag, Package, CheckCircle, X, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+interface Product {
+  id: number;
+  name_en: string;
+  price: number;
+  category: string;
+  image_url: string;
+  description_en: string;
+  in_stock?: boolean;
+  stock_count?: number;
+}
 
 interface Category {
   id: number;
@@ -15,6 +27,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,10 +51,10 @@ export default function CategoriesPage() {
       setLoading(true);
       // Generate categories from products
       const response = await mockAdminApi.getAdminProducts(1, 100);
-      const products = response.data;
+      const products: Product[] = response.data;
       
-      const categoryMap = new Map();
-      products.forEach((product: any) => {
+      const categoryMap = new Map<string, Category>();
+      products.forEach((product: Product) => {
         if (!categoryMap.has(product.category)) {
           categoryMap.set(product.category, {
             id: categoryMap.size + 1,
@@ -53,7 +66,10 @@ export default function CategoriesPage() {
             created_at: '2024-01-15'
           });
         }
-        categoryMap.get(product.category).productCount++;
+        const category = categoryMap.get(product.category);
+        if (category) {
+          category.productCount++;
+        }
       });
 
       setCategories(Array.from(categoryMap.values()));
@@ -205,15 +221,15 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Category Management</h1>
-          <p className="text-slate-600 mt-1">Organize and manage your product categories</p>
+          <h1 className="text-3xl font-bold text-slate-900">{t('admin.categories.title')}</h1>
+          <p className="text-slate-600 mt-1">{t('admin.categories.description')}</p>
         </div>
         <button
           onClick={() => openModal('add')}
           className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
         >
           <Plus className="w-5 h-5 mr-2" />
-          Add New Category
+          {t('admin.categories.addNew')}
         </button>
       </div>
 
@@ -225,7 +241,7 @@ export default function CategoriesPage() {
               <Tag className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Categories</p>
+              <p className="text-sm font-medium text-slate-600">{t('admin.categories.stats.total')}</p>
               <p className="text-2xl font-bold text-slate-900">{categories.length}</p>
             </div>
           </div>
@@ -237,7 +253,7 @@ export default function CategoriesPage() {
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Active Categories</p>
+              <p className="text-sm font-medium text-slate-600">{t('admin.categories.stats.active')}</p>
               <p className="text-2xl font-bold text-green-600">
                 {categories.filter(c => c.status === 'active').length}
               </p>
@@ -251,7 +267,7 @@ export default function CategoriesPage() {
               <Package className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Products</p>
+              <p className="text-sm font-medium text-slate-600">{t('admin.categories.stats.totalProducts')}</p>
               <p className="text-2xl font-bold text-purple-600">
                 {categories.reduce((sum, c) => sum + c.productCount, 0)}
               </p>
@@ -264,21 +280,21 @@ export default function CategoriesPage() {
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Search Categories</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.categories.searchLabel')}</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name or description..."
+                placeholder="{t('admin.categories.searchPlaceholder')}"
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Filter by Status</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.categories.filterLabel')}</label>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <select
@@ -286,18 +302,18 @@ export default function CategoriesPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full pl-10 pr-8 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
               >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">{t('admin.categories.allStatus')}</option>
+                <option value="active">{t('admin.status.active')}</option>
+                <option value="inactive">{t('admin.status.inactive')}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Results</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.categories.resultsLabel')}</label>
             <div className="flex items-center py-3">
               <span className="text-slate-600 bg-slate-50 px-3 py-2 rounded-lg text-sm">
-                Showing <span className="font-semibold text-slate-900">{filteredCategories.length}</span> of <span className="font-semibold text-slate-900">{categories.length}</span> categories
+                {t('admin.categories.showingResults', { count: filteredCategories.length, total: categories.length })}
               </span>
             </div>
           </div>
@@ -323,7 +339,7 @@ export default function CategoriesPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {category.status.charAt(0).toUpperCase() + category.status.slice(1)}
+                      {t(`admin.status.${category.status}`)}
                     </span>
                   </div>
                 </div>
@@ -335,7 +351,7 @@ export default function CategoriesPage() {
                     <div className="flex items-center">
                       <Package className="w-4 h-4 text-slate-400 mr-2" />
                       <span className="text-sm font-medium text-slate-700">
-                        {category.productCount} {category.productCount === 1 ? 'product' : 'products'}
+                        {t('admin.categories.productCount', { count: category.productCount })}
                       </span>
                     </div>
                     <span className="text-xs text-slate-500">
@@ -356,14 +372,14 @@ export default function CategoriesPage() {
                 className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
                 <Edit className="w-4 h-4 mr-1" />
-                Edit
+                {t('admin.common.edit')}
               </button>
               <button
                 onClick={() => setShowDeleteModal(category)}
                 className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
               >
                 <Trash2 className="w-4 h-4 mr-1" />
-                Delete
+                {t('admin.common.delete')}
               </button>
             </div>
           </div>
@@ -376,11 +392,11 @@ export default function CategoriesPage() {
           <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Tag className="w-10 h-10 text-slate-400" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">No categories found</h3>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">{t('admin.categories.noCategoriesFound')}</h3>
           <p className="text-slate-600 mb-6 max-w-md mx-auto">
             {searchTerm || statusFilter !== 'all'
-              ? 'Try adjusting your search or filter criteria to find what you\'re looking for.'
-              : 'Get started by creating your first product category to organize your skincare products.'
+              ? t('admin.categories.noCategoriesFoundFilters')
+              : t('admin.categories.noCategoriesFoundStart')
             }
           </p>
           {searchTerm || statusFilter !== 'all' ? (
@@ -392,7 +408,7 @@ export default function CategoriesPage() {
               className="inline-flex items-center px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
             >
               <X className="w-5 h-5 mr-2" />
-              Clear Filters
+              {t('admin.categories.clearFilters')}
             </button>
           ) : (
             <button
@@ -400,7 +416,7 @@ export default function CategoriesPage() {
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Create Your First Category
+              {t('admin.categories.createFirst')}
             </button>
           )}
         </div>
@@ -416,7 +432,7 @@ export default function CategoriesPage() {
                   <Tag className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900">
-                  {showModal.type === 'add' ? 'Add New Category' : 'Edit Category'}
+                  {showModal.type === 'add' ? t('admin.categories.modal.addTitle') : t('admin.categories.modal.editTitle')}
                 </h3>
               </div>
               <button
@@ -429,24 +445,24 @@ export default function CategoriesPage() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Category Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.categories.form.name')}</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter category name"
+                  placeholder="{t('admin.categories.form.namePlaceholder')}"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('admin.categories.form.description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  placeholder="Enter category description"
+                  placeholder="{t('admin.categories.form.descriptionPlaceholder')}"
                   rows={3}
                   required
                 />
@@ -459,8 +475,8 @@ export default function CategoriesPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="active">{t('admin.status.active')}</option>
+                  <option value="inactive">{t('admin.status.inactive')}</option>
                 </select>
               </div>
               
@@ -470,14 +486,14 @@ export default function CategoriesPage() {
                   disabled={saving}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Saving...' : (showModal.type === 'add' ? 'Create Category' : 'Update Category')}
+                  {saving ? t('admin.common.saving') : (showModal.type === 'add' ? t('admin.categories.modal.create') : t('admin.categories.modal.update'))}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowModal(null)}
                   className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
                 >
-                  Cancel
+                  {t('admin.common.cancel')}
                 </button>
               </div>
             </form>
@@ -494,7 +510,7 @@ export default function CategoriesPage() {
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                   <Trash2 className="w-5 h-5 text-red-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">Delete Category</h3>
+                <h3 className="text-lg font-semibold text-slate-900">{t('admin.categories.deleteModal.title')}</h3>
               </div>
               <button
                 onClick={() => setShowDeleteModal(null)}
@@ -506,18 +522,18 @@ export default function CategoriesPage() {
             
             <div className="p-6">
               <p className="text-slate-600 mb-4">
-                Are you sure you want to delete <span className="font-semibold text-slate-900">"{showDeleteModal.name}"</span>?
+                {t('admin.categories.deleteModal.message', { name: showDeleteModal.name })}
               </p>
               
               {showDeleteModal.productCount > 0 && (
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
                   <p className="text-orange-800 text-sm">
-                    <strong>Warning:</strong> This category contains {showDeleteModal.productCount} product{showDeleteModal.productCount !== 1 ? 's' : ''}. Deleting this category may affect these products.
+                    <strong>{t('admin.categories.deleteModal.warning')}</strong> {t('admin.categories.deleteModal.warningMessage', { count: showDeleteModal.productCount })}
                   </p>
                 </div>
               )}
               
-              <p className="text-sm text-slate-500 mb-6">This action cannot be undone.</p>
+              <p className="text-sm text-slate-500 mb-6">{t('admin.categories.deleteModal.confirmation')}</p>
               
               <div className="flex space-x-3">
                 <button
@@ -525,13 +541,13 @@ export default function CategoriesPage() {
                   disabled={saving}
                   className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Deleting...' : 'Delete Category'}
+                  {saving ? t('admin.common.deleting') : t('admin.categories.deleteModal.confirmButton')}
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(null)}
                   className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
                 >
-                  Cancel
+                  {t('admin.common.cancel')}
                 </button>
               </div>
             </div>

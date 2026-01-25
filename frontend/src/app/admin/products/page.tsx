@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { mockAdminApi, mockProducts } from '@/lib/mockApi';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 interface Product {
   id: number;
@@ -16,6 +17,7 @@ interface Product {
 }
 
 export default function AdminProducts() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,8 +184,8 @@ export default function AdminProducts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
-          <p className="text-gray-600 mt-1">Manage your skincare product catalog</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.products.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('admin.products.description')}</p>
         </div>
         <Link
           href="/admin/products/new"
@@ -192,7 +194,7 @@ export default function AdminProducts() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Add New Product
+          {t('admin.products.addNew')}
         </Link>
       </div>
 
@@ -204,7 +206,7 @@ export default function AdminProducts() {
               <span className="text-2xl">🧴</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Products</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.products.total')}</p>
               <p className="text-2xl font-bold text-gray-900">{products.length}</p>
             </div>
           </div>
@@ -216,7 +218,7 @@ export default function AdminProducts() {
               <span className="text-2xl">✅</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">In Stock</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.products.inStock')}</p>
               <p className="text-2xl font-bold text-green-600">
                 {products.filter(p => p.in_stock).length}
               </p>
@@ -230,7 +232,7 @@ export default function AdminProducts() {
               <span className="text-2xl">⚠️</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Low Stock</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.products.lowStock')}</p>
               <p className="text-2xl font-bold text-orange-600">
                 {products.filter(p => (p.stock_count || 0) <= 5 && p.in_stock).length}
               </p>
@@ -244,7 +246,7 @@ export default function AdminProducts() {
               <span className="text-2xl">❌</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.products.outOfStock')}</p>
               <p className="text-2xl font-bold text-red-600">
                 {products.filter(p => !p.in_stock).length}
               </p>
@@ -258,13 +260,13 @@ export default function AdminProducts() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.products.searchPlaceholder')}</label>
             <div className="relative">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name, category..."
+                placeholder={t('admin.products.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,7 +277,7 @@ export default function AdminProducts() {
 
           {/* Category Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.products.category')}</label>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -283,7 +285,7 @@ export default function AdminProducts() {
             >
               {categories.map(category => (
                 <option key={category} value={category} className="capitalize">
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('admin.products.allCategories') : t(`admin.categories.${category}`)}
                 </option>
               ))}
             </select>
@@ -291,16 +293,16 @@ export default function AdminProducts() {
 
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.products.stockStatus')}</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Status</option>
-              <option value="in_stock">In Stock</option>
-              <option value="low_stock">Low Stock (≤5)</option>
-              <option value="out_of_stock">Out of Stock</option>
+              <option value="all">{t('admin.products.allStatus')}</option>
+              <option value="in_stock">{t('admin.products.inStock')}</option>
+              <option value="low_stock">{t('admin.products.lowStock')} (≤5)</option>
+              <option value="out_of_stock">{t('admin.products.outOfStock')}</option>
             </select>
           </div>
 
@@ -309,7 +311,7 @@ export default function AdminProducts() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Results</label>
             <div className="flex items-center py-2">
               <span className="text-gray-600">
-                Showing {currentPageProducts.length} of {filteredProducts.length} products
+                {t('admin.products.showingResults', { start: ((currentPage - 1) * itemsPerPage) + 1, end: Math.min(currentPage * itemsPerPage, filteredProducts.length), total: filteredProducts.length })}
               </span>
             </div>
           </div>
@@ -322,16 +324,16 @@ export default function AdminProducts() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-blue-700 font-medium">
-                {selectedProducts.size} product{selectedProducts.size !== 1 ? 's' : ''} selected
+                {t('admin.products.selectedCount', { count: selectedProducts.size })}
               </span>
               <select
                 value={bulkAction}
                 onChange={(e) => setBulkAction(e.target.value)}
                 className="px-3 py-1 border border-blue-300 rounded-md bg-white text-sm"
               >
-                <option value="">Choose action...</option>
-                <option value="delete">Delete Selected</option>
-                <option value="export">Export Selected</option>
+                <option value="">{t('admin.products.chooseAction')}</option>
+                <option value="delete">{t('admin.products.bulkDelete')}</option>
+                <option value="export">{t('admin.products.bulkExport')}</option>
               </select>
             </div>
             <div className="flex space-x-2">
@@ -340,13 +342,13 @@ export default function AdminProducts() {
                 disabled={!bulkAction}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
-                Apply Action
+                {t('admin.products.applyAction')}
               </button>
               <button
                 onClick={() => setSelectedProducts(new Set())}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm"
               >
-                Clear Selection
+                {t('admin.products.clearSelection')}
               </button>
             </div>
           </div>
@@ -367,12 +369,12 @@ export default function AdminProducts() {
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Product</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Category</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Stock</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.product')}</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.category')}</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.price')}</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.stock')}</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.status')}</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">{t('admin.products.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -419,10 +421,10 @@ export default function AdminProducts() {
                         : 'bg-green-100 text-green-800'
                     }`}>
                       {!product.in_stock 
-                        ? 'Out of Stock' 
+                        ? t('admin.products.outOfStock')
                         : (product.stock_count || 0) <= 5 
-                        ? 'Low Stock' 
-                        : 'In Stock'
+                        ? t('admin.products.lowStock')
+                        : t('admin.products.inStock')
                       }
                     </span>
                   </td>
@@ -432,13 +434,13 @@ export default function AdminProducts() {
                         href={`/admin/products/${product.id}`}
                         className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                       >
-                        Edit
+                        {t('admin.products.edit')}
                       </Link>
                       <button
                         onClick={() => setShowDeleteModal(product.id)}
                         className="text-red-600 hover:text-red-700 font-medium text-sm"
                       >
-                        Delete
+                        {t('admin.products.delete')}
                       </button>
                     </div>
                   </td>
@@ -452,7 +454,7 @@ export default function AdminProducts() {
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} results
+              {t('admin.pagination.showingResults', { start: ((currentPage - 1) * itemsPerPage) + 1, end: Math.min(currentPage * itemsPerPage, filteredProducts.length), total: filteredProducts.length })}
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -460,7 +462,7 @@ export default function AdminProducts() {
                 disabled={currentPage === 1}
                 className="px-3 py-1 border border-slate-300 rounded-md text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {t('admin.pagination.previous')}
               </button>
               
               {[...Array(Math.min(totalPages, 5))].map((_, index) => {
@@ -495,7 +497,7 @@ export default function AdminProducts() {
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 border border-slate-300 rounded-md text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {t('admin.pagination.next')}
               </button>
             </div>
           </div>
@@ -506,11 +508,11 @@ export default function AdminProducts() {
       {filteredProducts.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('admin.products.noProductsFound')}</h3>
           <p className="text-gray-600 mb-6">
             {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
-              ? 'Try adjusting your filters to see more results.'
-              : 'Get started by adding your first product.'
+              ? t('admin.products.noProductsFoundFilters')
+              : t('admin.products.noProductsFoundStart')
             }
           </p>
           {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' ? (
@@ -522,7 +524,7 @@ export default function AdminProducts() {
               }}
               className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
-              Clear Filters
+              {t('admin.products.clearFilters')}
             </button>
           ) : (
             <Link
@@ -532,7 +534,7 @@ export default function AdminProducts() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Add Your First Product
+              {t('admin.products.addFirstProduct')}
             </Link>
           )}
         </div>
@@ -548,23 +550,23 @@ export default function AdminProducts() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Delete Product</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('admin.products.deleteModal.title')}</h3>
             </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this product? This action cannot be undone.
+              {t('admin.products.deleteModal.message')}
             </p>
             <div className="flex space-x-3">
               <button
                 onClick={() => handleDeleteProduct(showDeleteModal)}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                Delete Product
+                {t('admin.products.deleteModal.confirm')}
               </button>
               <button
                 onClick={() => setShowDeleteModal(null)}
                 className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>

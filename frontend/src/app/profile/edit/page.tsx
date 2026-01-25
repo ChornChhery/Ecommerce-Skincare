@@ -58,7 +58,7 @@ export default function EditProfilePage() {
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'th', label: 'ไทย (Thai)' },
-    { value: 'km', label: 'ខ្មែរ (Khmer)' },
+    { value: 'kh', label: 'ខ្មែរ (Khmer)' },
   ];
 
   const genderOptions = [

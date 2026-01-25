@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 import { mockApi } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -8,6 +10,7 @@ import RecentlyViewedProducts, { addToRecentlyViewed } from '@/components/Recent
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
+
 
 interface Product {
   id: number;
@@ -35,11 +38,6 @@ interface Category {
   count: number;
 }
 
-interface CartItem {
-  product_id: number;
-  quantity: number;
-}
-
 interface Filters {
   search: string;
   category: string;
@@ -49,14 +47,13 @@ interface Filters {
 }
 
 export default function Home() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -75,7 +72,7 @@ export default function Home() {
   const toastActions = useToastActions();
   const router = useRouter();
 
-  const categoryConfig: Record<string, { icon: string }> = {
+  const categoryConfig = useMemo(() => ({
     'all': { icon: '🌟' },
     'cleanser': { icon: '🧼' },
     'moisturizer': { icon: '💧' },
@@ -88,9 +85,11 @@ export default function Home() {
     'eye cream': { icon: '👁️' },
     'oil': { icon: '🫒' },
     'treatment': { icon: '🧴' },
-    'medicine': { icon: '💊' }
-  };
+    'medicine': { icon: '💊' },
+    'skincare': { icon: '🧴' }
+  }) as Record<string, { icon: string }>, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const enhanceProductData = (products: any[]): Product[] => {
     return products.map(product => ({
       ...product,
@@ -137,14 +136,10 @@ export default function Home() {
         
         if (isAuthenticated) {
           const savedFavorites = localStorage.getItem('favorites');
-          const savedRecentlyViewed = localStorage.getItem('recentlyViewed');
-          const savedCart = localStorage.getItem('cart');
           
           if (savedFavorites) setFavorites(new Set(JSON.parse(savedFavorites)));
-          if (savedRecentlyViewed) setRecentlyViewed(JSON.parse(savedRecentlyViewed));
-          if (savedCart) setCart(JSON.parse(savedCart));
         }
-      } catch (error) {
+      } catch {
         setError('Failed to load products');
       } finally {
         setLoading(false);
@@ -152,7 +147,7 @@ export default function Home() {
     };
 
     fetchProducts();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, categoryConfig]);
 
   useEffect(() => {
     let filtered = [...products];
@@ -208,7 +203,7 @@ export default function Home() {
 
   const getProductName = (product: Product) => {
     if (user?.language === 'th') return product.name_th;
-    if (user?.language === 'km') return product.name_kh;
+    if (user?.language === 'kh') return product.name_kh;
     return product.name_en;
   };
 
@@ -246,23 +241,22 @@ export default function Home() {
       return;
     }
 
-    setCart(prev => {
-      const existingItem = prev.find(item => item.product_id === productId);
-      let updated;
-      
-      if (existingItem) {
-        updated = prev.map(item =>
-          item.product_id === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        updated = [...prev, { product_id: productId, quantity: 1 }];
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(updated));
-      return updated;
-    });
+    const savedCart = localStorage.getItem('cart') || '[]';
+    const prev: Array<{ product_id: number; quantity: number }> = JSON.parse(savedCart);
+    const existingItem = prev.find((item: { product_id: number; quantity: number }) => item.product_id === productId);
+    let updated;
+    
+    if (existingItem) {
+      updated = prev.map((item: { product_id: number; quantity: number }) =>
+        item.product_id === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      updated = [...prev, { product_id: productId, quantity: 1 }];
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(updated));
     
     // Trigger custom event to update navbar counter after state update
     setTimeout(() => {
@@ -326,29 +320,28 @@ export default function Home() {
   }
 
   // Add to cart first (if not already added, or increment)
-  setCart(prev => {
-      const existingItem = prev.find(item => item.product_id === product.id);
-      let updated;
-      if (existingItem) {
-        updated = prev.map(item =>
+  const savedCart = localStorage.getItem('cart') || '[]';
+  const prev: Array<{ product_id: number; quantity: number }> = JSON.parse(savedCart);
+  const existingItem = prev.find((item: { product_id: number; quantity: number }) => item.product_id === product.id);
+  let updated;
+  if (existingItem) {
+    updated = prev.map((item: { product_id: number; quantity: number }) =>
       item.product_id === product.id
         ? { ...item, quantity: item.quantity + 1 }
         : item
     );
-      } else {
-        updated = [...prev, { product_id: product.id, quantity: 1 }];
-      }
-      localStorage.setItem('cart', JSON.stringify(updated));
-      return updated;
-    });
+  } else {
+    updated = [...prev, { product_id: product.id, quantity: 1 }];
+  }
+  localStorage.setItem('cart', JSON.stringify(updated));
     
-    // Trigger custom event to update navbar counter after state update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('cartUpdated'));
-    }, 0);
+  // Trigger custom event to update navbar counter after state update
+  setTimeout(() => {
+    window.dispatchEvent(new Event('cartUpdated'));
+  }, 0);
 
-    // Then navigate to products page
-    router.push('/products');
+  // Then navigate to products page
+  router.push('/products');
   };
 
   if (loading) {
@@ -358,7 +351,7 @@ export default function Home() {
         <div className="flex justify-center items-center min-h-[70vh]">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading products...</p>
+            <p className="text-gray-600 font-medium">{t('home.loading', 'Loading products...')}</p>
           </div>
         </div>
         <Footer />
@@ -374,12 +367,12 @@ export default function Home() {
           <div className="text-center max-w-md">
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{error}</h2>
-            <p className="text-gray-600 mb-6">Please try refreshing the page or contact support if the problem persists.</p>
+            <p className="text-gray-600 mb-6">{t('home.errorMsg', 'Please try refreshing the page or contact support if the problem persists.')}</p>
             <button 
               onClick={() => window.location.reload()}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
-              Refresh Page
+              {t('common.refresh', 'Refresh Page')}
             </button>
           </div>
         </div>
@@ -396,11 +389,10 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Premium Skincare Collection
+            {t('home.title', 'Premium Skincare Collection')}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Discover professional-grade skincare products carefully selected for quality, 
-            effectiveness, and outstanding results.
+            {t('home.subtitle', 'Discover professional-grade skincare products carefully selected for quality, effectiveness, and outstanding results.')}
           </p>
           
           {isAuthenticated && user?.skin_type && (
@@ -417,7 +409,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto relative">
             <input
               type="text"
-              placeholder="Search skincare products..."
+              placeholder={t('common.searchPlaceholder', 'Search skincare products...')}
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="w-full px-5 py-4 pl-12 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
@@ -435,7 +427,7 @@ export default function Home() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Filters
+              {t('product.filters', 'Filters')}
             </button>
           </div>
         </div>
@@ -444,18 +436,18 @@ export default function Home() {
           <div className={`${showFilters ? 'block' : 'hidden'} lg:w-80 flex-shrink-0`}>
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm sticky top-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Filter Products</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('product.filterProducts', 'Filter Products')}</h2>
                 <button
                   onClick={clearAllFilters}
                   className="text-sm text-gray-500 hover:text-gray-700 font-medium"
                 >
-                  Clear all
+                  {t('product.clearAll', 'Clear all')}
                 </button>
               </div>
 
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Categories</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('product.categories', 'Categories')}</h3>
                   <div className="space-y-2">
                     {categories.map((category) => (
                       <button
@@ -469,7 +461,22 @@ export default function Home() {
                       >
                         <span className="flex items-center space-x-2">
                           <span className="text-base">{category.icon}</span>
-                          <span className="capitalize">{category.name}</span>
+                          <span className="capitalize">{
+                            category.name === 'skincare' ? t('product.skinCare', 'Skincare') :
+                            category.name === 'cleanser' ? t('product.cleanser', 'Cleanser') :
+                            category.name === 'moisturizer' ? t('product.moisturizer', 'Moisturizer') :
+                            category.name === 'serum' ? t('product.serum', 'Serum') :
+                            category.name === 'sunscreen' ? t('product.sunscreen', 'Sunscreen') :
+                            category.name === 'toner' ? t('product.toner', 'Toner') :
+                            category.name === 'mask' ? t('product.mask', 'Mask') :
+                            category.name === 'exfoliator' ? t('product.exfoliator', 'Exfoliator') :
+                            category.name === 'essence' ? t('product.essence', 'Essence') :
+                            category.name === 'eye cream' ? t('product.eye_cream', 'Eye Cream') :
+                            category.name === 'oil' ? t('product.oil', 'Oil') :
+                            category.name === 'treatment' ? t('product.treatment', 'Treatment') :
+                            category.name === 'medicine' ? t('product.medicine', 'Medicine') :
+                            category.name
+                          }</span>
                         </span>
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
                           {category.count}
@@ -480,7 +487,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Price Range</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('product.priceRange', 'Price Range')}</h3>
                   <input
                     type="range"
                     min="0"
@@ -499,7 +506,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Sort By</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('product.sortBy', 'Sort By')}</h3>
                   <select
                     value={filters.sortBy}
                     onChange={(e) => setFilters(prev => ({ 
@@ -508,11 +515,11 @@ export default function Home() {
                     }))}
                     className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="name">Name (A to Z)</option>
-                    <option value="price-low">Price (Low to High)</option>
-                    <option value="price-high">Price (High to Low)</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="popularity">Most Popular</option>
+                    <option value="name">{t('product.sortName', 'Name (A to Z)')}</option>
+                    <option value="price-low">{t('product.sortPriceLow', 'Price (Low to High)')}</option>
+                    <option value="price-high">{t('product.sortPriceHigh', 'Price (High to Low)')}</option>
+                    <option value="rating">{t('product.sortRating', 'Highest Rated')}</option>
+                    <option value="popularity">{t('product.sortPopular', 'Most Popular')}</option>
                   </select>
                 </div>
 
@@ -527,14 +534,17 @@ export default function Home() {
                       }))}
                       className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700 font-medium">In Stock Only</span>
+                    <span className="text-sm text-gray-700 font-medium">{t('product.inStockOnly', 'In Stock Only')}</span>
                   </label>
                 </div>
 
                 <div className="pt-6 border-t border-gray-200">
                   <div className="text-sm text-gray-600">
-                    Showing <span className="font-semibold text-gray-900">{displayedProducts.length}</span> of{' '}
-                    <span className="font-semibold text-gray-900">{filteredProducts.length}</span> products
+                    {t('common.pagination.showingResults', 'Showing {{start}} to {{end}} of {{total}} results', {
+                      start: Math.min(((currentPage - 1) * productsPerPage) + 1, filteredProducts.length),
+                      end: Math.min(currentPage * productsPerPage, filteredProducts.length),
+                      total: filteredProducts.length
+                    }).replace('{{start}}', String(Math.min(((currentPage - 1) * productsPerPage) + 1, filteredProducts.length))).replace('{{end}}', String(Math.min(currentPage * productsPerPage, filteredProducts.length))).replace('{{total}}', String(filteredProducts.length))}
                   </div>
                 </div>
               </div>
@@ -561,10 +571,12 @@ export default function Home() {
                       )}
 
                       <div className="relative aspect-[4/5] overflow-hidden">
-                        <img
+                        <Image
                           src={product.image_url}
                           alt={getProductName(product)}
-                          className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                          fill
+                          unoptimized
+                          className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
                             !product.in_stock ? 'grayscale opacity-60' : ''
                           }`}
                         />
@@ -597,7 +609,22 @@ export default function Home() {
                         <div className="absolute bottom-4 left-4">
                           <span className="inline-flex items-center space-x-1 px-3 py-1 text-xs font-medium bg-gray-900/80 text-white rounded-lg backdrop-blur-sm capitalize">
                             <span>{categoryConfig[product.category.toLowerCase()]?.icon || '🧴'}</span>
-                            <span>{product.category}</span>
+                            <span>{
+                              product.category === 'skincare' ? t('product.skinCare', 'Skincare') :
+                              product.category === 'cleanser' ? t('product.cleanser', 'Cleanser') :
+                              product.category === 'moisturizer' ? t('product.moisturizer', 'Moisturizer') :
+                              product.category === 'serum' ? t('product.serum', 'Serum') :
+                              product.category === 'sunscreen' ? t('product.sunscreen', 'Sunscreen') :
+                              product.category === 'toner' ? t('product.toner', 'Toner') :
+                              product.category === 'mask' ? t('product.mask', 'Mask') :
+                              product.category === 'exfoliator' ? t('product.exfoliator', 'Exfoliator') :
+                              product.category === 'essence' ? t('product.essence', 'Essence') :
+                              product.category === 'eye cream' ? t('product.eye_cream', 'Eye Cream') :
+                              product.category === 'oil' ? t('product.oil', 'Oil') :
+                              product.category === 'treatment' ? t('product.treatment', 'Treatment') :
+                              product.category === 'medicine' ? t('product.medicine', 'Medicine') :
+                              product.category
+                            }</span>
                           </span>
                         </div>
                       </div>
@@ -625,7 +652,7 @@ export default function Home() {
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                             ))}
                           </div>
@@ -656,39 +683,41 @@ export default function Home() {
                           </div>
                         </div>
 
-                  {isAuthenticated ? (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleBuyNow(product);
-                        }}
-                        disabled={!product.in_stock}
-                        className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                      >
-                        {product.in_stock ? 'Buy Now' : 'Unavailable'}
-                      </button>
-                      <button
-                        onClick={(e) => handleAddToCart(e, product.id)}
-                        disabled={!product.in_stock}
-                        className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                  ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push('/login');
-                            }}
-                            className="w-full bg-gray-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-700 transition-colors"
-                          >
-                            Sign In to Purchase
-                          </button>
-                        )}
+                        <div className="flex gap-2">
+                          {isAuthenticated ? (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBuyNow(product);
+                                }}
+                                disabled={!product.in_stock}
+                                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                              >
+                                {product.in_stock ? t('product.buyNow', 'Buy Now') : t('product.unavailable', 'Unavailable')}
+                              </button>
+                              <button
+                                onClick={(e) => handleAddToCart(e, product.id)}
+                                disabled={!product.in_stock}
+                                className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-7h.01M19 19a2 2 0 11-4 0 2 2 0 014 0zM9 19a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push('/login');
+                              }}
+                              className="w-full bg-gray-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                            >
+                              {t('auth.signInToPurchase', 'Sign In to Purchase')}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -701,7 +730,7 @@ export default function Home() {
                       disabled={currentPage === 1}
                       className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Previous
+                      {t('common.pagination.previous', t('common.previous', 'Previous'))}
                     </button>
                     
                     {[...Array(Math.min(totalPages, 7))].map((_, index) => {
@@ -736,7 +765,7 @@ export default function Home() {
                       disabled={currentPage === totalPages}
                       className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Next
+                      {t('common.pagination.next', t('common.next', 'Next'))}
                     </button>
                   </div>
                 )}
@@ -744,15 +773,15 @@ export default function Home() {
             ) : (
               <div className="text-center py-20">
                 <div className="text-gray-300 text-6xl mb-6">🔍</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Products Found</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('product.noFound', 'No Products Found')}</h3>
                 <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
-                  We couldn't find any products matching your current filters. Try adjusting your search criteria.
+                  {t('product.noFoundMsg', "We couldn't find any products matching your current filters. Try adjusting your search criteria.")}
                 </p>
                 <button
                   onClick={clearAllFilters}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Clear All Filters
+                  {t('product.clearAll', 'Clear All Filters')}
                 </button>
               </div>
             )}
@@ -760,8 +789,8 @@ export default function Home() {
             {products.length === 0 && !loading && (
               <div className="text-center py-20">
                 <div className="text-gray-300 text-6xl mb-6">📦</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Products Available</h3>
-                <p className="text-gray-600 text-lg">Our product collection is currently being updated. Please check back soon!</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('product.noAvailable', 'No Products Available')}</h3>
+                <p className="text-gray-600 text-lg">{t('product.noAvailableMsg', 'Our product collection is currently being updated. Please check back soon!')}</p>
               </div>
             )}
           </div>
@@ -787,10 +816,12 @@ export default function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="relative">
                   <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
-                    <img
-                      src={quickViewProduct.image_url}
-                      alt={getProductName(quickViewProduct)}
-                      className="w-full h-full object-cover"
+                    <Image
+                      src={quickViewProduct!.image_url}
+                      alt={getProductName(quickViewProduct!)}
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                   </div>
                 </div>
@@ -798,10 +829,10 @@ export default function Home() {
                 <div className="space-y-6">
                   <div className="flex items-center space-x-3">
                     <span className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-full capitalize">
-                      <span>{categoryConfig[quickViewProduct.category.toLowerCase()]?.icon || '🧴'}</span>
-                      <span>{quickViewProduct.category}</span>
+                      <span>{categoryConfig[quickViewProduct!.category.toLowerCase()]?.icon || '🧴'}</span>
+                      <span>{quickViewProduct!.category}</span>
                     </span>
-                    {!quickViewProduct.in_stock && (
+                    {!quickViewProduct!.in_stock && (
                       <span className="bg-red-100 text-red-700 px-3 py-2 rounded-full text-sm font-medium">
                         Out of Stock
                       </span>
@@ -809,7 +840,7 @@ export default function Home() {
                   </div>
 
                   <h3 className="text-3xl font-bold text-gray-900 leading-tight">
-                    {getProductName(quickViewProduct)}
+                    {getProductName(quickViewProduct!)}
                   </h3>
 
                   <div className="flex items-center space-x-4">
@@ -818,7 +849,7 @@ export default function Home() {
                         <svg
                           key={i}
                           className={`w-5 h-5 ${
-                            i < Math.floor(quickViewProduct.rating || 0) ? 'text-yellow-400' : 'text-gray-300'
+                              i < Math.floor(quickViewProduct!.rating || 0) ? 'text-yellow-400' : 'text-gray-300'
                           }`}
                           fill="currentColor"
                           viewBox="0 0 20 20"
@@ -828,64 +859,64 @@ export default function Home() {
                       ))}
                     </div>
                     <span className="text-lg text-gray-600 font-medium">
-                      {quickViewProduct.rating?.toFixed(1)} ({quickViewProduct.reviews_count} reviews)
+                      {quickViewProduct!.rating?.toFixed(1)} ({quickViewProduct!.reviews_count} reviews)
                     </span>
                   </div>
 
                   <div className="flex items-center space-x-3">
                     <span className="text-4xl font-bold text-gray-900">
-                      ${quickViewProduct.price.toFixed(2)}
+                      ${quickViewProduct!.price.toFixed(2)}
                     </span>
-                    {quickViewProduct.original_price && (
+                    {quickViewProduct!.original_price && (
                       <>
                         <span className="text-2xl text-gray-500 line-through">
-                          ${quickViewProduct.original_price.toFixed(2)}
+                          ${quickViewProduct!.original_price.toFixed(2)}
                         </span>
                         <span className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
-                          {calculateDiscount(quickViewProduct.original_price, quickViewProduct.price)}% OFF
+                          {calculateDiscount(quickViewProduct!.original_price!, quickViewProduct!.price)}% OFF
                         </span>
                       </>
                     )}
                   </div>
 
-                  {quickViewProduct.stock_count && quickViewProduct.in_stock && (
+                  {quickViewProduct!.stock_count && quickViewProduct!.in_stock && (
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <span className={`font-medium ${
-                        quickViewProduct.stock_count <= 5 ? 'text-red-600' : 'text-green-600'
+                        quickViewProduct!.stock_count <= 5 ? 'text-red-600' : 'text-green-600'
                       }`}>
-                        {quickViewProduct.stock_count <= 5 
-                          ? `Only ${quickViewProduct.stock_count} left in stock!`
-                          : `In stock (${quickViewProduct.stock_count} available)`
+                        {quickViewProduct!.stock_count <= 5
+                          ? `Only ${quickViewProduct!.stock_count} left in stock!`
+                          : `In stock (${quickViewProduct!.stock_count} available)`
                         }
                       </span>
                     </div>
                   )}
 
                   <p className="text-gray-600 leading-relaxed text-lg">
-                    {quickViewProduct.description_en}
+                    {quickViewProduct!.description_en}
                   </p>
 
                   {isAuthenticated ? (
                     <div className="space-y-4 pt-4">
                       <button
                         onClick={() => {
-                          handleAddToCart({ stopPropagation: () => {} } as React.MouseEvent, quickViewProduct.id);
+                          handleAddToCart({ stopPropagation: () => {} } as React.MouseEvent, quickViewProduct!.id);
                         }}
-                        disabled={!quickViewProduct.in_stock}
+                        disabled={!quickViewProduct!.in_stock}
                         className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {quickViewProduct.in_stock ? 'Add to Cart' : 'Out of Stock'}
+                        {quickViewProduct!.in_stock ? 'Add to Cart' : 'Out of Stock'}
                       </button>
                       
                       <button
-                        onClick={() => toggleFavorite({ stopPropagation: () => {} } as React.MouseEvent, quickViewProduct.id)}
+                        onClick={() => toggleFavorite({ stopPropagation: () => {} } as React.MouseEvent, quickViewProduct!.id)}
                         className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-colors ${
-                          favorites.has(quickViewProduct.id)
+                          favorites.has(quickViewProduct!.id)
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
-                        {favorites.has(quickViewProduct.id) ? 'Remove from Favorites' : 'Add to Favorites'}
+                        {favorites.has(quickViewProduct!.id) ? 'Remove from Favorites' : 'Add to Favorites'}
                       </button>
                     </div>
                   ) : (

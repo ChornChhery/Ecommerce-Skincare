@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -30,25 +32,25 @@ export default function RegisterPage() {
   const { login } = useAuth();
 
   const skinTypes = [
-    { value: '', label: 'Select your skin type' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'oily', label: 'Oily' },
-    { value: 'dry', label: 'Dry' },
-    { value: 'combination', label: 'Combination' },
-    { value: 'sensitive', label: 'Sensitive' },
+    { value: '', label: t('registerPage.selectSkinType', 'Select your skin type') },
+    { value: 'normal', label: t('admin.customers.skinTypes.normal', 'Normal') },
+    { value: 'oily', label: t('admin.customers.skinTypes.oily', 'Oily') },
+    { value: 'dry', label: t('admin.customers.skinTypes.dry', 'Dry') },
+    { value: 'combination', label: t('admin.customers.skinTypes.combination', 'Combination') },
+    { value: 'sensitive', label: t('admin.customers.skinTypes.sensitive', 'Sensitive') },
   ];
 
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'th', label: 'ไทย (Thai)' },
-    { value: 'km', label: 'ខ្មែរ (Khmer)' },
+    { value: 'kh', label: 'ខ្មែរ (Khmer)' },
   ];
 
   const genderOptions = [
-    { value: '', label: 'Select your gender' },
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'other', label: 'Other' },
+    { value: '', label: t('registerPage.selectGender', 'Select your gender') },
+    { value: 'male', label: t('registerPage.genderMale', 'Male') },
+    { value: 'female', label: t('registerPage.genderFemale', 'Female') },
+    { value: 'other', label: t('registerPage.genderOther', 'Other') },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +66,7 @@ export default function RegisterPage() {
     }
 
     // Prepare data for API (remove confirmPassword)
-    const { confirmPassword, ...apiData } = formData;
+    const { confirmPassword: _, ...apiData } = formData;
 
     try {
       const response = await fetch('http://localhost:8081/auth/register', {
@@ -84,7 +86,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || 'Registration failed');
       }
-    } catch (err) {
+    } catch (error) {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -177,10 +179,10 @@ export default function RegisterPage() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                Join Our Community
+                {t('registerPage.title', 'Join Our Community')}
               </h2>
               <p className="text-gray-600 text-sm">
-                {currentStep === 1 ? 'Create your account to start your skincare journey' : 'Tell us about yourself for personalized recommendations'}
+                {currentStep === 1 ? t('registerPage.createAccountDescription', 'Create your account to start your skincare journey') : t('registerPage.personalizeDescription', 'Tell us about yourself for personalized recommendations')}
               </p>
             </div>
 
@@ -202,7 +204,7 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name
+                        {t('auth.firstName', 'First Name')}
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -225,7 +227,7 @@ export default function RegisterPage() {
 
                     <div>
                       <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name
+                        {t('auth.lastName', 'Last Name')}
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -250,7 +252,7 @@ export default function RegisterPage() {
                   {/* Email Field */}
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
+                      {t('auth.email', 'Email Address')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -274,7 +276,7 @@ export default function RegisterPage() {
                   {/* Password Field */}
                   <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Password
+                      {t('auth.password', 'Password')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -315,7 +317,7 @@ export default function RegisterPage() {
                   {/* Confirm Password Field */}
                   <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirm Password
+                      {t('auth.confirmPassword', 'Confirm Password')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -359,7 +361,7 @@ export default function RegisterPage() {
                     disabled={!isStep1Valid()}
                     className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
-                    <span>Continue</span>
+                    <span>{t('common.continue', 'Continue')}</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -373,7 +375,7 @@ export default function RegisterPage() {
                   {/* Phone Field */}
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
+                      {t('profilePage.phone', 'Phone Number')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -396,7 +398,7 @@ export default function RegisterPage() {
                   {/* Skin Type */}
                   <div>
                     <label htmlFor="skin_type" className="block text-sm font-medium text-gray-700 mb-2">
-                      Skin Type
+                      {t('registerPage.skinType', 'Skin Type')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -426,7 +428,7 @@ export default function RegisterPage() {
                   {/* Language */}
                   <div>
                     <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
-                      Preferred Language
+                      {t('registerPage.preferredLanguage', 'Preferred Language')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -459,7 +461,7 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700 mb-2">
-                        Date of Birth
+                        {t('registerPage.dateOfBirth', 'Date of Birth')}
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -480,7 +482,7 @@ export default function RegisterPage() {
 
                     <div>
                       <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
-                        Gender
+                        {t('registerPage.gender', 'Gender')}
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -513,7 +515,7 @@ export default function RegisterPage() {
                   {/* Profile Image Upload */}
                   <div>
                     <label htmlFor="profile_image" className="block text-sm font-medium text-gray-700 mb-2">
-                      Profile Picture <span className="text-gray-400 text-xs">(Optional)</span>
+                      {t('registerPage.profilePicture', 'Profile Picture')} <span className="text-gray-400 text-xs">({t('common.optional', 'Optional')})</span>
                     </label>
                     <div className="flex items-center space-x-4">
                       {/* Image Preview */}
@@ -547,9 +549,9 @@ export default function RegisterPage() {
                         <div className="mt-2">
                           <label className="inline-flex items-center px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            Upload Image
+                            {t('registerPage.uploadImage', 'Upload Image')}
                             <input
                               type="file"
                               accept="image/*"
@@ -572,7 +574,7 @@ export default function RegisterPage() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                       </svg>
-                      <span>Back</span>
+                      <span>{t('common.back', 'Back')}</span>
                     </button>
                     
                     <button
@@ -583,11 +585,11 @@ export default function RegisterPage() {
                       {loading ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Creating account...</span>
+                          <span>{t('registerPage.creatingAccount', 'Creating account...')}</span>
                         </>
                       ) : (
                         <>
-                          <span>Create Account</span>
+                          <span>{t('registerPage.createAccount', 'Create Account')}</span>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
@@ -602,12 +604,12 @@ export default function RegisterPage() {
             {/* Sign in link */}
             <div className="text-center pt-4 border-t border-gray-200">
               <p className="text-gray-600 text-sm">
-                Already have an account?{' '}
+                {t('registerPage.haveAccount', 'Already have an account?')}{' '}
                 <Link 
                   href="/login" 
                   className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  Sign in here
+                  {t('registerPage.signInHere', 'Sign in here')}
                 </Link>
               </p>
             </div>
@@ -617,15 +619,15 @@ export default function RegisterPage() {
           <div className="mt-6 grid grid-cols-3 gap-3">
             <div className="text-center p-3 bg-white border border-gray-200 rounded-lg">
               <div className="text-2xl mb-1">🔒</div>
-              <div className="text-xs text-gray-600 font-medium">Secure</div>
+              <div className="text-xs text-gray-600 font-medium">{t('registerPage.secure', 'Secure')}</div>
             </div>
             <div className="text-center p-3 bg-white border border-gray-200 rounded-lg">
               <div className="text-2xl mb-1">✨</div>
-              <div className="text-xs text-gray-600 font-medium">Personalized</div>
+              <div className="text-xs text-gray-600 font-medium">{t('registerPage.personalized', 'Personalized')}</div>
             </div>
             <div className="text-center p-3 bg-white border border-gray-200 rounded-lg">
               <div className="text-2xl mb-1">🎯</div>
-              <div className="text-xs text-gray-600 font-medium">Targeted</div>
+              <div className="text-xs text-gray-600 font-medium">{t('registerPage.targeted', 'Targeted')}</div>
             </div>
           </div>
         </div>

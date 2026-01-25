@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -17,6 +18,7 @@ export default function ProductImageGallery({ images, productName, className = '
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Fallback image
   const fallbackImage = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&h=300';
@@ -188,7 +190,7 @@ export default function ProductImageGallery({ images, productName, className = '
             {/* Image Counter */}
             {displayImages.length > 1 && (
               <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                {currentImageIndex + 1} / {displayImages.length}
+                {t('image_counter', '{{current}} / {{total}}', { current: currentImageIndex + 1, total: displayImages.length })}
               </div>
             )}
           </div>
@@ -293,7 +295,7 @@ export default function ProductImageGallery({ images, productName, className = '
                 </button>
 
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black bg-opacity-60 text-white text-sm px-3 py-2 rounded">
-                  {currentImageIndex + 1} of {displayImages.length}
+                  {t('fullscreen_image_counter', '{{current}} of {{total}}', { current: currentImageIndex + 1, total: displayImages.length })}
                 </div>
               </>
             )}

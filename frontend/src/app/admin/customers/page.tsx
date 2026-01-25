@@ -3,12 +3,27 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Mail, Phone, MapPin, Calendar, User, ShoppingBag, Star } from 'lucide-react';
 import { mockAdminApi } from '@/lib/mockApi'; // Import the mock API
+import { useTranslation } from 'react-i18next';
+
+interface Customer {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  skin_type: string;
+  total_orders: number;
+  total_spent: number;
+  avg_rating: number;
+  status: string;
+  created_at: string;
+}
 
 export default function CustomersPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [skinTypeFilter, setSkinTypeFilter] = useState('all');
   const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -129,12 +144,12 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-gray-600">Manage customer accounts and view purchase history</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.customers.title')}</h1>
+          <p className="text-gray-600">{t('admin.customers.description')}</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500">
-            {pagination.total} customers
+            {t('admin.customers.count', { count: pagination.total })}
           </span>
         </div>
       </div>
@@ -147,7 +162,7 @@ export default function CustomersPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search customers by name or email..."
+                placeholder={t('admin.customers.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -162,12 +177,12 @@ export default function CustomersPage() {
                 onChange={(e) => setSkinTypeFilter(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Skin Types</option>
-                <option value="dry">Dry</option>
-                <option value="oily">Oily</option>
-                <option value="combination">Combination</option>
-                <option value="sensitive">Sensitive</option>
-                <option value="normal">Normal</option>
+                <option value="all">{t('admin.customers.allSkinTypes')}</option>
+                <option value="dry">{t('admin.customers.skinTypes.dry')}</option>
+                <option value="oily">{t('admin.customers.skinTypes.oily')}</option>
+                <option value="combination">{t('admin.customers.skinTypes.combination')}</option>
+                <option value="sensitive">{t('admin.customers.skinTypes.sensitive')}</option>
+                <option value="normal">{t('admin.customers.skinTypes.normal')}</option>
               </select>
             </div>
           </div>
@@ -179,26 +194,26 @@ export default function CustomersPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-blue-700">
-              {selectedCustomers.length} customer{selectedCustomers.length > 1 ? 's' : ''} selected
+              {t('admin.customers.selectedCount', { count: selectedCustomers.length })}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => console.log('Send email to selected customers')}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Send Email
+                {t('admin.customers.sendEmail')}
               </button>
               <button
                 onClick={() => console.log('Export selected customers')}
                 className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
               >
-                Export
+                {t('admin.common.export')}
               </button>
               <button
                 onClick={() => setSelectedCustomers([])}
                 className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
               >
-                Clear Selection
+                {t('admin.customers.clearSelection')}
               </button>
             </div>
           </div>
@@ -220,28 +235,28 @@ export default function CustomersPage() {
                   />
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  {t('admin.customers.table.customer')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
+                  {t('admin.customers.table.contact')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Skin Type
+                  {t('admin.customers.table.skinType')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Orders
+                  {t('admin.customers.table.orders')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Spent
+                  {t('admin.customers.table.totalSpent')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rating
+                  {t('admin.customers.table.rating')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t('admin.customers.table.status')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('admin.customers.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -269,7 +284,7 @@ export default function CustomersPage() {
                         </div>
                         <div className="text-sm text-gray-500 flex items-center">
                           <Calendar className="w-3 h-3 mr-1" />
-                          Joined {new Date(customer.created_at).toLocaleDateString()}
+                          {t('admin.customers.joined', { date: new Date(customer.created_at).toLocaleDateString() })}
                         </div>
                       </div>
                     </div>
@@ -290,7 +305,7 @@ export default function CustomersPage() {
                       <ShoppingBag className="w-4 h-4 text-gray-400 mr-2" />
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {customer.total_orders} orders
+                          {t('admin.customers.orderCount', { count: customer.total_orders })}
                         </div>
                       </div>
                     </div>
@@ -301,7 +316,7 @@ export default function CustomersPage() {
                     </div>
                     {customer.total_orders > 0 && (
                       <div className="text-xs text-gray-500">
-                        Avg: ${(customer.total_spent / customer.total_orders).toFixed(2)}
+                        {t('admin.customers.avgSpent', { amount: (customer.total_spent / customer.total_orders).toFixed(2) })}
                       </div>
                     )}
                   </td>
@@ -309,7 +324,7 @@ export default function CustomersPage() {
                     {customer.avg_rating > 0 ? (
                       renderStars(customer.avg_rating)
                     ) : (
-                      <span className="text-sm text-gray-400">No reviews</span>
+                      <span className="text-sm text-gray-400">{t('admin.customers.noReviews')}</span>
                     )}
                   </td>
                   <td className="px-4 py-4">
@@ -322,14 +337,14 @@ export default function CustomersPage() {
                       <button
                         onClick={() => console.log('View customer', customer.id)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                        title="View Details"
+                        title={t('admin.customers.viewDetails')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => console.log('Email customer', customer.email)}
                         className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
-                        title="Send Email"
+                        title={t('admin.customers.sendEmail')}
                       >
                         <Mail className="w-4 h-4" />
                       </button>
@@ -345,11 +360,11 @@ export default function CustomersPage() {
         {filteredCustomers.length === 0 && (
           <div className="text-center py-12">
             <User className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No customers found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.customers.noCustomersFound')}</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || skinTypeFilter !== 'all' 
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Get started by adding your first customer.'}
+                ? t('admin.customers.noCustomersFoundFilters')
+                : t('admin.customers.noCustomersFoundStart')}
             </p>
           </div>
         )}
@@ -359,7 +374,7 @@ export default function CustomersPage() {
       {pagination.totalPages > 1 && (
         <div className="mt-6 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+            {t('admin.pagination.showingResults', { start: ((pagination.page - 1) * pagination.limit) + 1, end: Math.min(pagination.page * pagination.limit, pagination.total), total: pagination.total })}
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -367,17 +382,17 @@ export default function CustomersPage() {
               disabled={pagination.page === 1}
               className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              {t('admin.pagination.previous')}
             </button>
             <span className="px-3 py-1 text-sm">
-              Page {pagination.page} of {pagination.totalPages}
+              {t('admin.customers.pageInfo', { currentPage: pagination.page, totalPages: pagination.totalPages })}
             </span>
             <button
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
               disabled={pagination.page === pagination.totalPages}
               className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              {t('admin.pagination.next')}
             </button>
           </div>
         </div>
@@ -391,7 +406,7 @@ export default function CustomersPage() {
               <User className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-gray-500">Total Customers</div>
+              <div className="text-sm font-medium text-gray-500">{t('admin.customers.stats.total')}</div>
               <div className="text-2xl font-bold text-gray-900">{pagination.total}</div>
             </div>
           </div>
@@ -405,7 +420,7 @@ export default function CustomersPage() {
               </div>
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-gray-500">Active Customers</div>
+              <div className="text-sm font-medium text-gray-500">{t('admin.customers.stats.active')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 {customers.filter(c => c.status === 'active').length}
               </div>
@@ -421,7 +436,7 @@ export default function CustomersPage() {
               </div>
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-gray-500">VIP Customers</div>
+              <div className="text-sm font-medium text-gray-500">{t('admin.customers.stats.vip')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 {customers.filter(c => c.status === 'vip').length}
               </div>
@@ -435,7 +450,7 @@ export default function CustomersPage() {
               <ShoppingBag className="h-8 w-8 text-purple-600" />
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-gray-500">Avg Orders</div>
+              <div className="text-sm font-medium text-gray-500">{t('admin.customers.stats.avgOrders')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 {customers.length > 0 
                   ? (customers.reduce((sum, c) => sum + c.total_orders, 0) / customers.length).toFixed(1)

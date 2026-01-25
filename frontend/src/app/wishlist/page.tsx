@@ -6,7 +6,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToastActions } from '@/contexts/ToastContext';
-import { mockApi, mockProducts } from '@/lib/mockApi';
+import { mockProducts } from '@/lib/mockApi';
+import { useTranslation } from 'react-i18next';
 
 interface WishlistItem {
   id: number;
@@ -24,12 +25,13 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
+  const { t } = useTranslation();
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingItems, setRemovingItems] = useState<Set<number>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'price_low' | 'price_high' | 'name'>('newest');
   
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const toastActions = useToastActions();
   const router = useRouter();
 
@@ -158,9 +160,8 @@ export default function WishlistPage() {
           cart = [];
         }
       }
-      
       // Check if product already exists in cart
-      const existingItemIndex = cart.findIndex((cartItem: any) => cartItem.product_id === item.product_id);
+      const existingItemIndex = cart.findIndex((cartItem: { product_id: number }) => cartItem.product_id === item.product_id);
       
       if (existingItemIndex >= 0) {
         // Update quantity
@@ -216,7 +217,7 @@ export default function WishlistPage() {
       
       // Add all in-stock items to cart
       inStockItems.forEach(item => {
-        const existingItemIndex = cart.findIndex((cartItem: any) => cartItem.product_id === item.product_id);
+        const existingItemIndex = cart.findIndex((cartItem: { product_id: number }) => cartItem.product_id === item.product_id);
         
         if (existingItemIndex >= 0) {
           // Update quantity
@@ -266,7 +267,7 @@ export default function WishlistPage() {
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="mt-6 text-center">
               <div className="text-lg font-semibold text-gray-700">
-                Loading Your Wishlist...
+                {t('wishlist.loading', 'Loading Your Wishlist...')}
               </div>
             </div>
           </div>
@@ -290,11 +291,11 @@ export default function WishlistPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              My Wishlist
+              {t('wishlistPage.title', 'My Wishlist')}
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your favorite skincare products saved for later
+            {t('wishlist.description', 'Your favorite skincare products saved for later')}
           </p>
         </div>
 
@@ -306,16 +307,16 @@ export default function WishlistPage() {
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Your wishlist is empty
+              {t('wishlistPage.empty', 'Your wishlist is empty')}
             </h3>
             <p className="text-gray-600 text-lg mb-8">
-              Start adding products you love to keep track of them!
+              {t('wishlist.emptyMsg', 'Start adding products you love to keep track of them!')}
             </p>
             <button
               onClick={() => router.push('/')}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Discover Products
+              {t('wishlist.discoverProducts', 'Discover Products')}
             </button>
           </div>
         ) : (
@@ -324,25 +325,25 @@ export default function WishlistPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700 font-medium">
-                  {wishlistItems.length} item{wishlistItems.length > 1 ? 's' : ''} saved
+                  {t('wishlist.savedCount', '{{count}} item{{plural}} saved', { count: wishlistItems.length, plural: wishlistItems.length > 1 ? 's' : '' })}
                 </span>
                 <div className="h-4 w-px bg-gray-300"></div>
                 <span className="text-sm text-gray-500">
-                  {wishlistItems.filter(item => item.in_stock).length} in stock
+                  {t('wishlist.inStockCount', '{{count}} in stock', { count: wishlistItems.filter(item => item.in_stock).length })}
                 </span>
               </div>
               
               <div className="flex items-center space-x-4">
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'price_low' | 'price_high' | 'name')}
                   className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="price_low">Price: Low to High</option>
-                  <option value="price_high">Price: High to Low</option>
-                  <option value="name">Name A-Z</option>
+                  <option value="newest">{t('wishlist.sort.newest', 'Newest First')}</option>
+                  <option value="oldest">{t('wishlist.sort.oldest', 'Oldest First')}</option>
+                  <option value="price_low">{t('wishlist.sort.priceLow', 'Price: Low to High')}</option>
+                  <option value="price_high">{t('wishlist.sort.priceHigh', 'Price: High to Low')}</option>
+                  <option value="name">{t('wishlist.sort.nameAZ', 'Name A-Z')}</option>
                 </select>
                 
                 <button
@@ -350,7 +351,7 @@ export default function WishlistPage() {
                   disabled={wishlistItems.filter(item => item.in_stock).length === 0}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Add All to Cart
+                  {t('wishlist.addAllToCart', 'Add All to Cart')}
                 </button>
               </div>
             </div>
@@ -377,7 +378,7 @@ export default function WishlistPage() {
                     {!item.in_stock && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span className="bg-red-500 text-white px-4 py-2 rounded-full font-semibold">
-                          Out of Stock
+                          {t('product.outOfStock', 'Out of Stock')}
                         </span>
                       </div>
                     )}
@@ -403,7 +404,7 @@ export default function WishlistPage() {
                     {/* Discount Badge */}
                     {item.original_price && item.original_price > item.price && (
                       <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        {Math.round((1 - item.price / item.original_price) * 100)}% OFF
+                        {t('wishlist.off', '{{percent}}% OFF', { percent: Math.round((1 - item.price / item.original_price) * 100) })}
                       </div>
                     )}
                   </div>
@@ -444,11 +445,11 @@ export default function WishlistPage() {
 
                     {/* Added Date */}
                     <div className="text-xs text-gray-400 mb-4">
-                      Added {new Date(item.added_date).toLocaleDateString('en-US', {
+                      {t('wishlist.addedOn', 'Added {{date}}', { date: new Date(item.added_date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric'
-                      })}
+                      }) })}
                     </div>
 
                     {/* Action Buttons */}
@@ -465,7 +466,7 @@ export default function WishlistPage() {
                             : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         }`}
                       >
-                        {item.in_stock ? 'Add to Cart' : 'Out of Stock'}
+                        {item.in_stock ? t('wishlist.addToCart', 'Add to Cart') : t('product.outOfStock', 'Out of Stock')}
                       </button>
                       
                       <button
@@ -475,7 +476,7 @@ export default function WishlistPage() {
                         }}
                         className="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
                       >
-                        View
+                        {t('wishlist.view', 'View')}
                       </button>
                     </div>
                   </div>

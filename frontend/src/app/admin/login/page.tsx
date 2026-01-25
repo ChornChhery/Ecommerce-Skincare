@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { mockAdminApi } from '@/lib/mockApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLogin() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -31,8 +33,9 @@ export default function AdminLogin() {
       
       // Redirect to admin dashboard
       router.push('/admin');
-    } catch (err: any) {
-      setError(err.message || 'Invalid admin credentials.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Invalid admin credentials.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,10 +71,10 @@ export default function AdminLogin() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                Admin Portal
+                {t('adminLoginPage.title', 'Admin Portal')}
               </h2>
               <p className="text-gray-600 text-sm">
-                Sign in to manage your skincare store
+                {t('adminLoginPage.subtitle', 'Sign in to manage your skincare store')}
               </p>
             </div>
 
@@ -90,7 +93,7 @@ export default function AdminLogin() {
                 {/* Email Field */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Admin Email Address
+                    {t('adminLoginPage.adminEmail', 'Admin Email Address')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -114,7 +117,7 @@ export default function AdminLogin() {
                 {/* Password Field */}
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Admin Password
+                    {t('adminLoginPage.password', 'Admin Password')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -159,10 +162,10 @@ export default function AdminLogin() {
                     type="checkbox"
                     className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                   />
-                  <span className="text-gray-600">Remember admin session</span>
+                  <span className="text-gray-600">{t('adminLoginPage.rememberMe', 'Remember admin session')}</span>
                 </label>
                 <span className="text-blue-600 font-medium">
-                  🔒 Secure Access
+                  🔒 {t('adminLoginPage.secureAccess', 'Secure Access')}
                 </span>
               </div>
 
@@ -179,7 +182,7 @@ export default function AdminLogin() {
                   </>
                 ) : (
                   <>
-                    <span>Sign In to Admin Panel</span>
+                    <span>{t('adminLoginPage.signIn', 'Sign In to Admin Panel')}</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -197,7 +200,7 @@ export default function AdminLogin() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Back to main website</span>
+                <span>{t('adminLoginPage.backToWebsite', 'Back to main website')}</span>
               </button>
             </div>
           </div>
@@ -206,7 +209,7 @@ export default function AdminLogin() {
           <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-medium text-purple-800 mb-2">Admin Demo Credentials:</h4>
+                <h4 className="text-sm font-medium text-purple-800 mb-2">{t('adminLoginPage.demoCredentials', 'Admin Demo Credentials')}:</h4>
                 <div className="text-xs text-purple-700 space-y-1">
                   <p><strong>Email:</strong> admin@skincare.com</p>
                   <p><strong>Password:</strong> admin123</p>
@@ -217,7 +220,7 @@ export default function AdminLogin() {
                 onClick={fillDemoCredentials}
                 className="px-3 py-2 bg-purple-600 text-white text-xs rounded-md hover:bg-purple-700 transition-colors font-medium"
               >
-                Auto Fill
+                {t('adminLoginPage.autoFill', 'Auto Fill')}
               </button>
             </div>
           </div>
