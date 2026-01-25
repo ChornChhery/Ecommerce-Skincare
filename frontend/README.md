@@ -232,7 +232,10 @@ components/
 
 ## 🚀 Getting Started
 
-1. Clone the repository
+For a complete setup guide when cloning this project for the first time, see the [../CLONE_AND_RUN.md](../CLONE_AND_RUN.md) file in the root directory.
+
+### Quick Start (after initial setup)
+1. Go to direactory of frontend: `cd frontend`
 2. Install dependencies: `npm install`
 3. Start development server: `npm run dev`
 4. Access the application at `http://localhost:3000`

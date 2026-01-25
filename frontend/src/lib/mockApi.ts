@@ -1,3 +1,5 @@
+import { RegisterUserData, ProductData, CouponData, UpdateData } from '@/types/api';
+
 const MOCK_DELAY = 500; // Simulate network delay
 
 export const mockProducts = [
@@ -576,7 +578,7 @@ export const mockApi = {
     throw new Error("Invalid credentials");
   },
 
-  register: async (userData: any) => {
+  register: async (userData: RegisterUserData) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     return {
       token: "mock-jwt-token",
@@ -686,23 +688,27 @@ export const mockAdminApi = {
     };
   },
 
-  createProduct: async (productData: any) => {
+  createProduct: async (productData: Omit<ProductData, 'stock' | 'status' | 'skin_type' | 'created_at'> & { stock?: number; status?: string; skin_type?: string }) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     const newProduct = {
       id: Math.max(...mockProducts.map(p => p.id)) + 1,
       ...productData,
+      stock: productData.stock ?? 0,
+      status: productData.status ?? "active",
+      skin_type: productData.skin_type ?? "all",
       created_at: new Date().toISOString().split('T')[0]
     };
     mockProducts.push(newProduct);
     return { data: newProduct };
   },
 
-  updateProduct: async (id: number, productData: any) => {
+  updateProduct: async (id: number, productData: Partial<Omit<ProductData, 'id'>>) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     const index = mockProducts.findIndex(p => p.id === id);
     if (index === -1) throw new Error("Product not found");
     
-    mockProducts[index] = { ...mockProducts[index], ...productData };
+    const updatedProduct = { ...mockProducts[index], ...productData };
+    mockProducts[index] = updatedProduct as typeof mockProducts[number];
     return { data: mockProducts[index] };
   },
 
@@ -858,24 +864,27 @@ export const mockAdminApi = {
     };
   },
 
-  createCoupon: async (couponData: any) => {
+  createCoupon: async (couponData: Omit<CouponData, 'usedCount' | 'created_at' | 'applicableCategories' | 'isFirstTimeOnly'> & { usedCount?: number; created_at?: string; applicableCategories?: string[]; isFirstTimeOnly?: boolean }) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     const newCoupon = {
       id: Math.max(...mockCoupons.map(c => c.id)) + 1,
       ...couponData,
-      usedCount: 0,
-      created_at: new Date().toISOString().split('T')[0]
+      usedCount: couponData.usedCount ?? 0,
+      created_at: couponData.created_at ?? new Date().toISOString().split('T')[0],
+      applicableCategories: couponData.applicableCategories ?? ['all'],
+      isFirstTimeOnly: couponData.isFirstTimeOnly ?? false
     };
     mockCoupons.push(newCoupon);
     return { data: newCoupon };
   },
 
-  updateCoupon: async (id: number, couponData: any) => {
+  updateCoupon: async (id: number, couponData: Partial<Omit<CouponData, 'id'>>) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     const index = mockCoupons.findIndex(c => c.id === id);
     if (index === -1) throw new Error("Coupon not found");
     
-    mockCoupons[index] = { ...mockCoupons[index], ...couponData };
+    const updatedCoupon = { ...mockCoupons[index], ...couponData };
+    mockCoupons[index] = updatedCoupon as typeof mockCoupons[number];
     return { data: mockCoupons[index] };
   },
 
@@ -888,7 +897,7 @@ export const mockAdminApi = {
     return { success: true };
   },
 
-  bulkUpdateCoupons: async (couponIds: number[], updates: any) => {
+  bulkUpdateCoupons: async (couponIds: number[], updates: UpdateData) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     
     couponIds.forEach(id => {
@@ -914,13 +923,14 @@ export const mockAdminApi = {
   },
 
   // Bulk Actions
-  bulkUpdateProducts: async (productIds: number[], updates: any) => {
+  bulkUpdateProducts: async (productIds: number[], updates: UpdateData) => {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
     
     productIds.forEach(id => {
       const index = mockProducts.findIndex(p => p.id === id);
       if (index !== -1) {
-        mockProducts[index] = { ...mockProducts[index], ...updates };
+        const updatedProduct = { ...mockProducts[index], ...updates };
+        mockProducts[index] = updatedProduct as typeof mockProducts[number];
       }
     });
     

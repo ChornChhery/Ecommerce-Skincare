@@ -5,7 +5,8 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import HttpBackend from 'i18next-http-backend';
 
-if (!i18n.isInitialized) {
+// Initialize i18n only if not already initialized
+if (typeof window !== 'undefined' && !i18n.isInitialized) {
   i18n
     .use(HttpBackend)
     .use(LanguageDetector)
@@ -21,23 +22,30 @@ if (!i18n.isInitialized) {
         order: ['localStorage', 'navigator'],
         caches: ['localStorage'],
         lookupLocalStorage: 'language',
-        checkWhitelist: true,
       },
       supportedLngs: ['en', 'kh'],
       nonExplicitSupportedLngs: true,
       interpolation: {
         escapeValue: false,
       },
+      debug: false, // Set to true to see logs
+      react: {
+        useSuspense: false,
+      },
+    } as const)
+    .then(() => {
+      // Ensure we use only the base language code
+      const currentLang = i18n.language;
+      if (currentLang && currentLang.includes('-')) {
+        const baseLanguage = currentLang.split('-')[0];
+        if (['en', 'kh'].includes(baseLanguage)) {
+          i18n.changeLanguage(baseLanguage);
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Failed to initialize i18n:', error);
     });
-
-  // Ensure we use only the base language code
-  const currentLang = i18n.language;
-  if (currentLang && currentLang.includes('-')) {
-    const baseLanguage = currentLang.split('-')[0];
-    if (['en', 'kh'].includes(baseLanguage)) {
-      i18n.changeLanguage(baseLanguage);
-    }
-  }
 }
 
 export default i18n;
