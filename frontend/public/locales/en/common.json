@@ -519,10 +519,7 @@
       "loading": "Loading products...",
       "errorMsg": "Please try refreshing the page or contact support if the problem persists.",
       "title": "Premium Skincare Collection",
-      "subtitle": "Discover professional-grade skincare products carefully selected for quality, effectiveness, and outstanding results.",
-      "recentlyViewed": "Recently Viewed",
-      "noRecentlyViewed": "No Recently Viewed Products",
-      "recentlyViewedDescription": "Products you view will appear here for easy access"
+      "subtitle": "Discover professional-grade skincare products carefully selected for quality, effectiveness, and outstanding results."
     },
     "product": {
       "filters": "Filters",
