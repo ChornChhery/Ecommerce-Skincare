@@ -9,13 +9,13 @@ interface Coupon {
   code: string;
   name: string;
   description: string;
-  type: 'percentage' | 'fixed';
+  type: 'percentage' | 'fixed' | string;
   value: number;
   minOrderValue: number;
   maxDiscount?: number;
   usageLimit: number;
   usedCount: number;
-  status: 'active' | 'inactive' | 'expired';
+  status: 'active' | 'inactive' | 'expired' | string;
   startDate: string;
   endDate: string;
   created_at: string;
@@ -71,7 +71,13 @@ export default function CouponsPage() {
     try {
       setLoading(true);
       const response = await mockAdminApi.getCoupons(1, 100, searchTerm, statusFilter, typeFilter);
-      setCoupons(response.data);
+      // Ensure type safety by mapping the response to enforce literal types
+      const typedCoupons: Coupon[] = response.data.map(coupon => ({
+        ...coupon,
+        type: coupon.type as 'percentage' | 'fixed',
+        status: coupon.status as 'active' | 'inactive' | 'expired'
+      }));
+      setCoupons(typedCoupons);
     } catch (error) {
       console.error('Failed to fetch coupons:', error);
     } finally {
@@ -100,11 +106,11 @@ export default function CouponsPage() {
     }
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(coupon => coupon.status === statusFilter);
+      filtered = filtered.filter(coupon => coupon.status.toString() === statusFilter);
     }
 
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(coupon => coupon.type === typeFilter);
+      filtered = filtered.filter(coupon => coupon.type.toString() === typeFilter);
     }
 
     setFilteredCoupons(filtered);
@@ -128,7 +134,7 @@ export default function CouponsPage() {
   };
 
   const formatValue = (coupon: Coupon) => {
-    return coupon.type === 'percentage' ? `${coupon.value}%` : `$${coupon.value}`;
+    return coupon.type.toString() === 'percentage' ? `${coupon.value}%` : `$${coupon.value}`;
   };
 
   const isExpired = (endDate: string) => {
@@ -140,9 +146,17 @@ export default function CouponsPage() {
     
     try {
       if (showModal?.type === 'add') {
-        await mockAdminApi.createCoupon(formData);
+        await mockAdminApi.createCoupon({
+          ...formData,
+          type: formData.type as 'percentage' | 'fixed',
+          status: formData.status as 'active' | 'inactive'
+        });
       } else if (showModal?.coupon) {
-        await mockAdminApi.updateCoupon(showModal.coupon.id, formData);
+        await mockAdminApi.updateCoupon(showModal.coupon.id, {
+          ...formData,
+          type: formData.type as 'percentage' | 'fixed',
+          status: formData.status as 'active' | 'inactive'
+        });
       }
       
       await fetchCoupons();
@@ -210,14 +224,14 @@ export default function CouponsPage() {
         code: coupon.code,
         name: coupon.name,
         description: coupon.description,
-        type: coupon.type,
+        type: coupon.type as 'percentage' | 'fixed',
         value: coupon.value,
         minOrderValue: coupon.minOrderValue,
         maxDiscount: coupon.maxDiscount || 0,
         usageLimit: coupon.usageLimit,
         startDate: coupon.startDate,
         endDate: coupon.endDate,
-        status: coupon.status,
+        status: coupon.status as 'active' | 'inactive',
         isFirstTimeOnly: coupon.isFirstTimeOnly || false,
         applicableCategories: coupon.applicableCategories || ['all']
       });
@@ -479,10 +493,10 @@ export default function CouponsPage() {
                         {coupon.code}
                       </span>
                     </div>
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(coupon.status)}`}>
-                      {coupon.status.charAt(0).toUpperCase() + coupon.status.slice(1)}
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(coupon.status.toString())}`}>
+                      {coupon.status.toString().charAt(0).toUpperCase() + coupon.status.toString().slice(1)}
                     </span>
-                    {isExpired(coupon.endDate) && coupon.status === 'active' && (
+                    {isExpired(coupon.endDate) && coupon.status.toString() === 'active' && (
                       <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
                         Expired
                       </span>
@@ -920,7 +934,7 @@ export default function CouponsPage() {
               <h3 className="text-lg font-semibold text-slate-900">Delete Coupon</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              Are you sure you want to delete coupon "{showDeleteModal.code}"? This coupon has been used {showDeleteModal.usedCount} times. This action cannot be undone.
+              Are you sure you want to delete coupon &quot;{showDeleteModal.code}&quot;? This coupon has been used {showDeleteModal.usedCount} times. This action cannot be undone.
             </p>
             <div className="flex space-x-3">
               <button
