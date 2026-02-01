@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import { mockProducts } from '@/lib/mockApi';
+import { ProductData } from '@/types/api';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function EditProductPage() {
   const productId = parseInt(params.id as string);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<ProductData | null>(null);
   const [formData, setFormData] = useState({
     name_en: '',
     price: '',

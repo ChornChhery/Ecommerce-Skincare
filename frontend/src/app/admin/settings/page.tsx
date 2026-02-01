@@ -125,7 +125,7 @@ export default function SettingsPage() {
     }
   };
 
-  const updateSetting = (section: keyof AdminSettings, key: string, value: any) => {
+  const updateSetting = (section: keyof AdminSettings, key: string, value: unknown) => {
     setSettings(prev => ({
       ...prev,
       [section]: {
@@ -135,13 +135,13 @@ export default function SettingsPage() {
     }));
   };
 
-  const updateNestedSetting = (section: keyof AdminSettings, nestedKey: string, key: string, value: any) => {
+  const updateNestedSetting = (section: keyof AdminSettings, nestedKey: string, key: string, value: unknown) => {
     setSettings(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
         [nestedKey]: {
-          ...(prev[section] as any)[nestedKey],
+          ...(prev[section] as Record<string, unknown>)?.[nestedKey] || {},
           [key]: value
         }
       }

@@ -1,3 +1,5 @@
+import { createContext } from 'react';
+
 // contexts/FeedbackContext.tsx
 export const FeedbackContext = createContext({
   reviews: [],
