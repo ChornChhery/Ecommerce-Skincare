@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Optimize build performance
-  swcMinify: true,
-  
   // Configure image optimization
   images: {
     remotePatterns: [
@@ -19,8 +16,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'berichthailand.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'yvescosmetic.com',
+      },
     ],
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: false, // Changed from conditional to false for consistency
   },
   
   // Experimental features for better performance
@@ -29,21 +30,24 @@ const nextConfig: NextConfig = {
   },
   
   // Webpack optimization
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Reduce bundle size
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\/]/,
-            name: 'vendors',
-            chunks: 'all',
+    if (!isServer) {
+      // Only apply these optimizations on client builds
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
           },
         },
-      },
-    };
+      };
+    }
     
     return config;
   },
